@@ -9,6 +9,9 @@ export const Users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: varchar('email', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
+    phone: varchar('phone',{length:10}),
+    address: varchar('address',{length:200}),
+    role: varchar('role',{length:200}),
     createAt: timestamp('created_at').defaultNow().notNull()
 
 })
@@ -21,7 +24,7 @@ export const Reports = pgTable('reports', {
     imageUrl: text('image_url'),
     verificationResult: jsonb('verification_result'),
     status: varchar('status', { length: 255 }).notNull().default('pending'),
-    createAt: timestamp('created_at').defaultNow().notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
     collectorId: integer('collector_id').references(() => Users.id)
 
 })
@@ -29,6 +32,7 @@ export const Rewards = pgTable('rewards', {
     id: serial('id').primaryKey(),
     useId: integer('user_id').references(() => Users.id).notNull(),
     points: integer('points').notNull().default(0),
+    level: integer("level").notNull().default(1),
     createAt: timestamp('created_at').defaultNow().notNull(),
     updateAt: timestamp('update_at').defaultNow().notNull(),
     isAvailable: boolean('is_available').notNull().default(true),

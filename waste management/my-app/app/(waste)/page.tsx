@@ -1,3 +1,5 @@
+// @ts-nocheck
+'use client'
 import Image from "next/image";
 import { ArrowRight, Leaf, Recycle, User, Coins, MapPin, ChevronRight, Icon ,UsersRound} from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,6 +21,7 @@ const AnimatedGolbe = () => {
 export default function Home() {
   return (
     <div className=" container mx-auto px-4 py-16">
+      
       <section className=" text-center mb-20 ">
         <AnimatedGolbe></AnimatedGolbe>
         <h1 className=" text-8xl font-bold mb-6 text-gray-800 tracking-tight">

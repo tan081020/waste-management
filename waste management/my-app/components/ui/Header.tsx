@@ -1,9 +1,9 @@
 'use client'
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import {  usePathname,useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
-import { Menu, Coins, Leaf, Search, Bell, User, ChevronDown, LogIn, LogOut } from "lucide-react";
+import { Menu, Coins, Leaf, Search, Bell, User, ChevronDown, LogIn, LogOut, Loader } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -16,8 +16,11 @@ import { Badge } from "@/components/ui/badge"
 import { Web3Auth } from "@web3auth/modal";
 import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from "@web3auth/base";
 import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { useMediaQuery } from "../hooks/useMediaQuery";
-import { createUser, getUnreadNotifications, getUserBalance, getUserByEmail, markNotificationAsRead } from "@/utils/db/actions";
+
+import { checkUser, createUser, getUnreadNotifications, getUserBalance, getUserByEmail, markNotificationAsRead } from "@/utils/db/actions";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+
 
 const clientId = process.env.W3_AUTH_CLIENT_ID
 
@@ -50,11 +53,11 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
     const [loggedIn, setLoggedIn] = useState(false)
     const [loading, setLoading] = useState(true)
     const [userInfo, setUserInfo] = useState<any>(null)
-    const pathname = usePathname
+    const pathname = usePathname()
     const [notification, setNotification] = useState<Notification[]>([])
     const [balence, setBalence] = useState(0)
     const isMobile = useMediaQuery("(max-width: 768px)")
-
+    const router = useRouter()
     useEffect(() => {
         const init = async () => {
             try {
@@ -68,7 +71,7 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                     if (user.email) {
                         localStorage.setItem('userEmail', user.email)
                         try {
-                            await createUser(user.email, user.name || 'anonyomous user')
+                            await getUserByEmail(user.email)
                         } catch (error) {
                             console.error('ok the tao dc user', error);
 
@@ -139,10 +142,19 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
             setLoggedIn(true)
             const user = await web3auth.getUserInfo()
             setUserInfo(user)
+          
+         
             if (user.email) {
                 localStorage.setItem('userEmail', user.email)
                 try {
-                    await createUser(user.email, user.name || 'anonymost user')
+                    const checkUSer = await checkUser(user.email)
+                    if(checkUSer){
+                        await getUserByEmail(user.email)
+                    }
+                    else{
+
+                        await createUser(user.email, user.name   || 'anonymost user')
+                    }
                 } catch (error) {
                     console.error("loitao user", error)
                 }
@@ -152,7 +164,9 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
 
         }
     }
-
+    
+    
+    
     const logout = async () => {
         if (!web3auth) {
             console.log("web3auth ko kha dung");
@@ -160,10 +174,12 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
         }
         try {
             await web3auth.logout()
+            router.push('/')
             setProvider(null)
             setLoggedIn(false)
             setUserInfo(null)
             localStorage.removeItem('userEmail')
+            
         } catch (error) {
             console.error("dang xuat that bai", error)
         }
@@ -175,7 +191,7 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
             if (user.email) {
                 localStorage.setItem('userEmail', user.email)
                 try {
-                    await createUser(user.email, user.name || "anonymost user")
+                    await getUserByEmail(user.email)
                 } catch (error) {
                     console.error("loi dang tao user", error)
                 }
@@ -186,10 +202,14 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
         await markNotificationAsRead(notificationId)
     }
     if (loading) {
-        return <div>Loading web3s auth ......</div>
+        return <div>
+            loading.....
+        </div>
+           
+        
+        
+        
     }
-
-
 
     return (
         <header className=" bg-white border-b broder-gray-200 sticky top-0 z-50">
@@ -288,6 +308,9 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                                     </DropdownMenuItem>
                                     <DropdownMenuItem onClick={logout}>
                                         Đăng Xuất
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem >
+                                        <Link href={'/dashboard'}>Admin</Link>
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
