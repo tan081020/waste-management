@@ -1,14 +1,18 @@
 import Link from "next/link"
 import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import { MapPin, Trash, Coins, Medal, Settings, Home, Car } from "lucide-react"
+import { MapPin, Trash, Coins, Medal, Settings, Home,BotMessageSquare,Newspaper } from "lucide-react"
 
 const sidebarItems = [
-  { href: "/", icon: Home, label: "Home" },
-  { href: "/report", icon: MapPin, label: "Report Waste" },
-  { href: "/collect", icon: Trash, label: "Collect Waste" },
-  { href: "/rewards", icon: Coins, label: "Rewards" },
-  { href: "/leaderboard", icon: Medal, label: "Leaderboard" },
+  { href: "/", icon: Home, label: "Trang chủ" },
+  { href: "/report", icon: MapPin, label: "Báo cáo rác thải" },
+  { href: "/collect", icon: Trash, label: "Nhiệm vụ thu gom rác" },
+  { href: "/rewards", icon: Coins, label: "Điểm thưởng" },
+  { href: "/leaderboard", icon: Medal, label: "Bản xếp hạng" },
+  { href: "/chatbot", icon: BotMessageSquare, label: "Con AI ngu ngốc" },
+  { href: "/news", icon: Newspaper, label: "Tin tức" },
+
+
 ]
 
 interface SidebarProps {
@@ -49,7 +53,7 @@ export default function Sidebar({ open }: SidebarProps) {
               }`} 
             >
               <Settings className="mr-3 h-5 w-5" />
-              <span className="text-base">Settings</span>
+              <span className="text-base">cài đặt</span>
             </Button>
           </Link>
         </div>

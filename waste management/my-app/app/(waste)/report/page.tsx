@@ -50,25 +50,44 @@ export default function ReportPage() {
         libraries: libraries
     });
 
-    const onLoad = useCallback((ref: google.maps.places.SearchBox) => {
-        setSearchBox(ref);
-    }, [])
-    const onPlacesChanged = () => {
-        if (searchBox) {
-            const places = searchBox.getPlaces();
-            if (places && places.length > 0) {
-                const place = places[0];
-                setNewReports(prev => ({
-                    ...prev,
-                    location: place.formatted_address || '',
-                }));
-            }
-        }
-    }
+   
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setNewReports({ ...newReports, [name]: value })
     }
+    const [location, setLocation] = useState(""); // Giá trị nhập vào
+    const [suggestions, setSuggestions] = useState<unknown[]>([]); // Gợi ý địa điểm
+    // Hàm tìm kiếm địa điểm
+    const handleLocationChange = async (e: { target: { value: any } }) => {
+        const inputValue = e.target.value;
+        setLocation(inputValue); // gõ input lấy value const api goong map
+
+        if (inputValue.length > 2) {
+            try {
+                const response = await fetch(
+                    `https://rsapi.goong.io/place/autocomplete?input=${inputValue}&api_key=l88dnrSbxbsh0yXbKTs5hz624XJmiersBeZlbLXX`
+                );
+                if (!response.ok) {
+                    throw new Error("Không tìm nạp được đề xuất vị trí");
+                }
+                const data = await response.json();
+                setSuggestions(data.predictions); // Cập nhật gợi ý địa điểm
+            } catch (error) {
+                console.error("Lỗi khi tìm nạp đề xuất vị trí:", error);
+            }
+        } else {
+            setSuggestions([]); // Xóa gợi ý nếu chuỗi nhập vào quá ngắn
+        }
+    };
+
+    
+    // Hàm chọn gợi ý
+    const handleSuggestionClick = (suggestion: {
+        description: React.SetStateAction<string>;
+    }) => {
+        setLocation(suggestion.description); // Cập nhật giá trị ô nhập liệu
+        setSuggestions([]); // Xóa gợi ý sau khi chọn
+    };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -109,11 +128,14 @@ export default function ReportPage() {
             ]
             const prompt = `You are an expert in waste management and recycling. Analyze this image and provide:
             1. The type of waste (e.g., plastic, paper, glass, metal, organic)
-            2. An estimate of the quantity or amount (in kg or liters)
+            2. amount (in kg or liters)
             3. Your confidence level in this assessment (as a percentage) 
+            No Explanation
+            No Approximately
+
             {
               "wasteType": "type of waste",
-              "quantity": "estimated quantity with unit",
+              "quantity": " quantity with unit",
               "confidence": confidence level as a number between 0 and 1
             }`
 
@@ -122,8 +144,10 @@ export default function ReportPage() {
             const responce = await result.response
             const text = responce.text()
 
+
             const json = `${text.slice(8, -4)}`
 
+         console.log(json);
 
 
             try {
@@ -161,7 +185,7 @@ export default function ReportPage() {
         try {
             const report = (await createReport(
                 user.id,
-                newReports.location,
+                location,
                 newReports.type,
                 newReports.amount,
                 preview || undefined,
@@ -170,7 +194,7 @@ export default function ReportPage() {
 
             const formattedReport = {
                 id: report.id,
-                location: report.location,
+                location: location,
                 wasteType: report.wasteType,
                 amount: report.amount,
                 createdAt: report.createdAt.toISOString().split('T')[0]
@@ -276,24 +300,55 @@ export default function ReportPage() {
                 )}
 
                 <div className=" grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label htmlFor="location" className=" block text-sm font-medium text-gray-700 mb-1">
-                            Location
+            
+                <div>
+                        <label
+                            htmlFor="location"
+                            className=" block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Vị trí
                         </label>
 
+
                         <input
-                            type="text"
                             id="location"
-                            name="location"
-                            value={newReports.location}
-                            onChange={handleInputChange}
+                            type="text"
+                            value={location}
+                            onChange={handleLocationChange} //hiển thị giá trị input
+                            placeholder="Enter waste location"
                             required
                             className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
-                            placeholder="Enter waste location"
                         />
-                      
 
+                        {suggestions.length > 0 && (
+                            <ul
+                                style={{
+                                    listStyleType: "none",
+                                    padding: 0,
+                                    margin: 0,
+                                    border: "1px solid #ccc",
+                                    maxHeight: "150px",
+                                    overflowY: "auto",
+                                }}
+                            >
+                                {suggestions.map((suggestion: any) => (
+                                    <li
+                                        key={suggestion.place_id}
+                                        onClick={() => handleSuggestionClick(suggestion)}
+                                        style={{
+                                            padding: "10px",
+                                            cursor: "pointer",
+                                            backgroundColor: "#fff",
+                                            borderBottom: "1px solid #eee",
+                                        }}
+                                    >
+                                        {suggestion.description}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
+                    
                     <div>
                         <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Waste Type</label>
                         <input

@@ -46,6 +46,7 @@ export const collectedWaste = pgTable('collected_waste', {
     reportId: integer('report_id').references(() => Reports.id).notNull(),
     collectorId: integer('collector_id').references(() => Users.id).notNull(),
     collectionDate: timestamp('collection_date').notNull(),
+    amount: varchar('amount', { length: 255 }).notNull(),
     status: varchar('status', { length: 255 }).notNull().default('collected'),
 
 

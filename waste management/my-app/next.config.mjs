@@ -6,7 +6,17 @@ const nextConfig = {
         GEMENI_API_KEY: process.env.GEMENI_API_KEY,
         GOOGLE_MAP_API_KEY: process.env.GOOGLE_MAP_API_KEY
 
-    }
-};
+    },
 
+ images: {
+        remotePatterns: [
+          {
+            protocol: 'https',
+            hostname: 'images.unsplash.com',
+            port: '',
+            pathname: '/**',
+          },
+        ],
+ }
+};
 export default nextConfig;

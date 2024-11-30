@@ -66,12 +66,13 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                 if (web3auth.connected) {
                     setLoggedIn(true)
                     const user = await web3auth.getUserInfo()
-                    setUserInfo(user)
+                  
 
                     if (user.email) {
                         localStorage.setItem('userEmail', user.email)
                         try {
-                            await getUserByEmail(user.email)
+                          const userS =  await getUserByEmail(user.email)
+                          setUserInfo(userS)
                         } catch (error) {
                             console.error('ok the tao dc user', error);
 

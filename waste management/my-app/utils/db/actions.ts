@@ -1,7 +1,8 @@
 
+import { User } from "lucide-react";
 import { db } from "./dbConfig";
 import { Notifications, Transaction, Users, Reports, Rewards,collectedWaste } from "./schema";
-import { eq, sql, and, desc, max, name } from "drizzle-orm";
+import { eq, sql, and, desc, max, name, gt } from "drizzle-orm";
 
 export async function createUser(email: string, name: String) {
     try {
@@ -251,7 +252,7 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
       throw error;
     }
   }
-  export async function saveCollectedWaste(reportId: number, collectorId: number, verificationResult: any) {
+  export async function saveCollectedWaste(reportId: number, collectorId: number, verificationResult: any,amount:string) {
     try {
       const [collectedWastes] = await db
         .insert(collectedWaste)
@@ -259,6 +260,7 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
           reportId,
           collectorId,
           collectionDate: new Date(),
+          amount,
           status: 'verified',
         })
         .returning()
@@ -332,5 +334,103 @@ export async function checkUser (email:string){
         console.error("loi check user", error);
         return false
 
+    }
+}
+export async function getAmountWaste (limit: number = 20){
+    try {
+        const amountWaste = await db.select({
+            amount:Reports.amount
+        }).from(Reports).limit(limit).execute()
+        return amountWaste
+    } catch (error) {
+        console.error("loi recent reports", error);
+        return null
+    }
+}
+export async function getAmountbyMoth (year:string){
+    try {
+        const amountWaste = await db
+            .select({
+                amount: Reports.amount,
+                date: Reports.createdAt
+            })
+            .from(Reports)
+            .where(sql`TO_CHAR(${Reports.createdAt}, 'YYYY-MM') = ${year}`)
+            .execute();
+        return amountWaste
+    } catch (error) {
+        console.error("loi recent reports", error);
+        return null
+    }
+}
+export async function getAmountbyyear (year:string){
+    try {
+        const amountWaste = await db
+            .select({
+                amount: Reports.amount,
+                date: Reports.createdAt
+            })
+            .from(Reports)
+            .where(sql`TO_CHAR(${Reports.createdAt}, 'YYYY') = ${year}`)
+            .execute();
+        return amountWaste
+    } catch (error) {
+        console.error("loi recent reports", error);
+        return null
+    }
+}
+export async function updateUserByEmail (email:string,name:string,phone:string,address:string){
+    try {
+        const updateUser = await db.update(Users).set({name,phone,address}).where(eq(Users.email,email))
+        return updateUser
+    } catch (error) {
+        console.error("loi update user", error);
+        return null
+    }
+}
+export async function deleteUser (email:string ){
+    try {
+       return  await db.delete(Users).where(eq(Users.email, email)).execute()
+    } catch (error) {
+        console.error("loi delete user", error);
+        
+    }
+}
+export async function updateUserByEmailAdmin (email:string,name:string,phone:string,address:string,role:string){
+    try {
+        const updateUser = await db.update(Users).set({name,phone,address,role}).where(eq(Users.email,email))
+        return updateUser
+    } catch (error) {
+        console.error("loi update user", error);
+        return null
+    }
+}
+export async function getAmountWasteById (id:number){
+    try {
+        const [amountWaste] = await db.select({
+            amount:Reports.amount
+        }).from(Reports).where(eq(Reports.id,id)).execute()
+        return amountWaste
+    } catch (error) {
+        console.error("loi recent reports", error);
+        
+    }
+}
+export async function getAmoutCollect (){
+    try {
+        const amountCollect = await db.select({amount:collectedWaste.amount}).from(collectedWaste).execute()
+        return amountCollect
+    } catch (error) {
+        console.error("loi  amount", error);
+        return null
+    }
+}
+export async function getPoint (){
+    try {
+        const point = await db.select({point:Transaction.amount}).from(Transaction).execute()
+        return point
+    } catch (error) {
+        console.error("loi  amount", error);
+        return null
     }
 }
