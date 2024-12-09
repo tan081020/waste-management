@@ -1,12 +1,9 @@
-export interface NewsItem {
-    _id: string;
-    title: string;
-    description: string;
-    snippet: string;
-    url: string;
-    imageUrl: string;
-    language: string;
-    published_at: string;
-    source: string;
-    categories: string[]
-  }
+ export interface NewsItem {
+  id: number;
+  description: string;
+  content: string;
+  author: string;
+  createAt: Date;
+  category: string; // Danh mục mới
+}
+

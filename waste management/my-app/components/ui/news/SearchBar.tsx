@@ -1,21 +1,25 @@
-import React from 'react'
-import { Input } from '@/components/ui/input';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react"; // Import icon tìm kiếm từ Lucide
 
 interface SearchBarProps {
-    onSearch: (searchTerm: string) => void;
+  onSearch: (searchTerm: string) => void;
 }
 
-const SearchBar = ({onSearch}: SearchBarProps) => {
+const SearchBar = ({ onSearch }: SearchBarProps) => {
   return (
-    <div className='mb-4 md:w-3/4'>
-        <h3 className='font-bold text-lg mb-2'>Search News</h3>
-        <Input type="text" 
-        onChange={(e) => onSearch(e.target.value)}
-        placeholder='Search news...' 
-        className='p-2 border rounded-md w-full'
+    
+      <div className=" flex items-center w-full">
+        <Input
+          type="text"
+          onChange={(e) => onSearch(e.target.value)}
+          placeholder="Tìm kiếm tin tức..."
+          className="p-4 pl-10 border-2 border-green-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 transition-all ease-in-out placeholder:text-green-500"
         />
-    </div>
-  )
-}
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-green-500" />
+      </div>
+   
+  );
+};
 
-export default SearchBar
+export default SearchBar;

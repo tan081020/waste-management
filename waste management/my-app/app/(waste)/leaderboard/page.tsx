@@ -1,10 +1,27 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { getAllRewards, getUserByEmail } from '@/utils/db/actions'
+import { getAllRewards, getAllUser, getPointById, getUserByEmail } from '@/utils/db/actions'
 import { Loader, Award, User, Trophy, Crown } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+import { Medal } from 'lucide-react';
+type Rewards = {
+  userId: number;
+  name: string;
+  type: string;
+  amount: number;
+};
 
-type Reward = {
+type Result = {
+  userId: number;
+  name: string;
+  totalAmount: number;
+};
+
+// Hàm tính cấp độ dựa trên điểm số
+const calculateLevel = (points: number) => {
+  return Math.floor(points / 500) + 1 // Mỗi 500 điểm sẽ lên một cấp
+}
+type Reward2 = {
   id: number
   userId: number
   points: number
@@ -14,43 +31,52 @@ type Reward = {
 }
 
 export default function LeaderboardPage() {
-  const [rewards, setRewards] = useState<Reward[]>([])
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<{ id: number; email: string; name: string } | null>(null)
+  const [allUsers, setAllUsers] = useState<Rewards[]>([]);
+  const [loading, setLoading] = useState(false)
+  const result: { [userId: number]: Result } = {};
+  const [rewards, setRewards] = useState<Reward2[]>([])
 
-  useEffect(() => {
-    const fetchRewardsAndUser = async () => {
-      setLoading(true)
-      try {
-        const fetchedRewards = await getAllRewards()
-        setRewards(fetchedRewards)
 
-        const userEmail = localStorage.getItem('userEmail')
-        if (userEmail) {
-          const fetchedUser = await getUserByEmail(userEmail)
-          if (fetchedUser) {
-            setUser(fetchedUser)
-          } else {
-            toast.error('User not found. Please log in again.')
-          }
-        } else {
-          toast.error('User not logged in. Please log in.')
-        }
-      } catch (error) {
-        console.error('Error fetching rewards and user:', error)
-        toast.error('Failed to load leaderboard. Please try again.')
-      } finally {
-        setLoading(false)
-      }
+  // Tính tổng điểm cho mỗi người dùng
+  allUsers.forEach(entry => {
+    const { userId, amount, type, name } = entry;
+
+    if (!result[userId]) {
+      result[userId] = {
+        userId,
+        name,
+        totalAmount: 0
+      };
     }
 
-    fetchRewardsAndUser()
-  }, [])
+    if (type.startsWith('earned')) {
+      result[userId].totalAmount += amount;
+    }
+  });
+
+  // Chuyển kết quả thành mảng và sắp xếp theo tổng điểm giảm dần
+  const output: Result[] = Object.values(result)
+    .sort((a, b) => b.totalAmount - a.totalAmount)
+    .slice(0, 10); // Lấy chỉ 10 người đứng đầu
+
+  useEffect(() => {
+    const getAllUsers = async () => {
+      try {
+        const getUSer = await getPointById();
+        setAllUsers(getUSer as []);
+      } catch (error) {
+        console.error("Error :", error);
+        toast.error("Failed to fetch user data");
+      }
+    };
+    getAllUsers();
+  }, []);
 
   return (
     <div className="">
       <div className="max-w-3xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Leaderboard </h1>
+        <Medal className="h-8 w-8 text-yellow-500 mr-2" />
+        <h1 className="text-3xl font-semibold mb-6 text-green-600">Bảng xếp hạng </h1>
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
@@ -60,9 +86,9 @@ export default function LeaderboardPage() {
           <div className="bg-white shadow-xl rounded-2xl overflow-hidden">
             <div className="bg-gradient-to-r from-green-500 to-green-600 p-6">
               <div className="flex justify-between items-center text-white">
-                <Trophy className="h-10 w-10" />
-                <span className="text-2xl font-bold">Top Performers</span>
-                <Award className="h-10 w-10" />
+                <Trophy className="h-10 w-10 text-yellow-500 " />
+                <span className="text-2xl font-bold text-yellow-400">Top Ten</span>
+                <Award className="h-10 w-10  text-yellow-500" />
               </div>
             </div>
             <div className="overflow-x-auto">
@@ -76,8 +102,8 @@ export default function LeaderboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rewards.map((reward, index) => (
-                    <tr key={reward.id} className={`${user && user.id === reward.userId ? 'bg-indigo-50' : ''} hover:bg-gray-50 transition-colors duration-150 ease-in-out`}>
+                  {output.map((reward, index) => (
+                    <tr key={reward.userId} >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           {index < 3 ? (
@@ -93,19 +119,19 @@ export default function LeaderboardPage() {
                             <User className="h-full w-full rounded-full bg-gray-200 text-gray-500 p-2" />
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{reward.userName}</div>
+                            <div className="text-sm font-medium text-gray-900">{reward.name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <Award className="h-5 w-5 text-indigo-500 mr-2" />
-                          <div className="text-sm font-semibold text-gray-900">{reward.points.toLocaleString()}</div>
+                          <div className="text-sm font-semibold text-gray-900">{reward.totalAmount.toLocaleString()}</div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                          Level {reward.level}
+                          Level {calculateLevel(parseInt(reward.totalAmount.toLocaleString()))}
                         </span>
                       </td>
                     </tr>

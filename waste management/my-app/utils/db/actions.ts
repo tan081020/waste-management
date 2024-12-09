@@ -1,10 +1,9 @@
-
-import { User } from "lucide-react";
+"use client"
 import { db } from "./dbConfig";
-import { Notifications, Transaction, Users, Reports, Rewards,collectedWaste } from "./schema";
-import { eq, sql, and, desc, max, name, gt } from "drizzle-orm";
+import { Notifications, Transaction, Users, Reports, Rewards,collectedWaste, News, Voucher } from "./schema";
+import { eq, sql, and, desc, asc,  } from "drizzle-orm";
 
-export async function createUser(email: string, name: String) {
+export async function createUser(email: string, name: string) {
     try {
         const [user] = await db.insert(Users).values({ email, name }).returning().execute()
         return user
@@ -53,7 +52,7 @@ export async function getRewardTransactions(userId: number) {
             amount: Transaction.amount,
             description: Transaction.description,
             date: Transaction.date
-        }).from(Transaction).where(eq(Transaction.userId, userId)).orderBy(desc(Transaction.date)).limit(10).execute()
+        }).from(Transaction).where(eq(Transaction.userId, userId)).orderBy(desc(Transaction.date))
         const formattedTranstions = transactions.map(t => ({
             ...t,
             date: t.date.toISOString().split('T')[0]
@@ -163,7 +162,6 @@ export async function getAvailableRewards(userId: number) {
             .where(eq(Rewards.isAvailable, true))
             .execute();
 
-        console.log("dbRewards", dbRewards);
 
 
         // Combine user points and database rewards
@@ -185,7 +183,7 @@ export async function getAvailableRewards(userId: number) {
         return [];
     }
 }
-export async function getWasteCollectionTalk(limit: number = 20) {
+export async function getWasteCollectionTalk(limit: number = 50) {
     try {
         const tasks = await db
             .select({
@@ -316,7 +314,7 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
             }))
        
     } catch (error) {
-        console.error("loi kay du lieu qua email", error);
+        console.error("loi lay du lieu qua email", error);
         return []
 
     }
@@ -351,18 +349,21 @@ export async function getAmountbyMoth (year:string){
     try {
         const amountWaste = await db
             .select({
-                amount: Reports.amount,
+                amountCollect:collectedWaste.amount,
+                amountReport: Reports.amount,
                 date: Reports.createdAt
             })
-            .from(Reports)
+            .from(collectedWaste).leftJoin(Reports,eq(collectedWaste.reportId,Reports.id))
             .where(sql`TO_CHAR(${Reports.createdAt}, 'YYYY-MM') = ${year}`)
-            .execute();
-        return amountWaste
+          
+     return amountWaste
+         
     } catch (error) {
         console.error("loi recent reports", error);
         return null
     }
 }
+
 export async function getAmountbyyear (year:string){
     try {
         const amountWaste = await db
@@ -372,6 +373,23 @@ export async function getAmountbyyear (year:string){
             })
             .from(Reports)
             .where(sql`TO_CHAR(${Reports.createdAt}, 'YYYY') = ${year}`)
+            .execute();
+        return amountWaste
+    } catch (error) {
+        console.error("loi recent reports", error);
+        return null
+    }
+}
+
+export async function  getAmounCollecttByear (year:string){
+    try {
+        const amountWaste = await db
+            .select({
+                amount: collectedWaste.amount,
+                date: collectedWaste.collectionDate
+            })
+            .from(collectedWaste)
+            .where(sql`TO_CHAR(${collectedWaste.collectionDate}, 'YYYY') = ${year}`)
             .execute();
         return amountWaste
     } catch (error) {
@@ -396,9 +414,9 @@ export async function deleteUser (email:string ){
         
     }
 }
-export async function updateUserByEmailAdmin (email:string,name:string,phone:string,address:string,role:string){
+export async function updateUserByEmailAdmin (email:string,data:any){
     try {
-        const updateUser = await db.update(Users).set({name,phone,address,role}).where(eq(Users.email,email))
+        const updateUser = await db.update(Users).set(data).where(eq(Users.email,email))
         return updateUser
     } catch (error) {
         console.error("loi update user", error);
@@ -431,6 +449,247 @@ export async function getPoint (){
         return point
     } catch (error) {
         console.error("loi  amount", error);
+        return null
+    }
+}
+export async function createNews(
+    userId:number,
+    description: string,
+    content: string,
+    author: string,
+    imageUrl:string
+) {
+    try {
+        const [news] = await db.insert(News).values({
+            userId, description, author, content, imageUrl
+        }).returning().execute()
+        return news
+    }catch (error) {
+        console.error('loi tao news', error);
+        return null
+    }
+}
+export async function getAllNews(){
+    try {
+        const allNews = await db.select().from(News).execute()
+        return allNews
+    } catch (error) {
+        console.error('loi get new', error);
+        return null
+    }
+}
+export async function getNewsById(id:number){
+    try {
+        const [newsId] = await db.select().from(News).where(eq(News.id,id)).execute()
+        return newsId
+    } catch (error) {
+        console.error('loi get new by id', error);
+        return null
+    }
+}
+
+export async function updateNewsById(id:number,newsData:any){
+    try {
+        const updateNews = await db.update(News).set(newsData).where(eq(News.id,id)).execute()
+        return updateNews
+    } catch (error) {
+        console.error('loi get new', error);
+        return null
+    }
+}
+export async function deleteNewsById(id:number){
+    try {
+        const deleteNews = await db.delete(News).where(eq(News.id,id)).execute()
+        return true
+    } catch (error) {
+        console.error('loi deleta', error);
+        return false
+    }
+}
+export async function getPointById(){
+    try {
+     
+        const point = await db.select({
+            userId:Transaction.userId,
+            amount:Transaction.amount,
+            type:Transaction.type,
+            name:Users.name
+        }).from(Transaction).leftJoin(Users, eq(Transaction.userId, Users.id))
+
+       return point
+       
+        
+    } catch (error) {1
+        console.error('loi point', error);
+        return null
+    }
+}
+export async function getUserReport(){
+    try {
+     
+        const userReport = await db.select({
+            id: Reports.userId,
+            name:Users.name,
+           location: Reports.location,
+           amount:Reports.amount,
+           status : Reports.status,
+           wasteType:Reports.wasteType,
+           createAt : Reports.createdAt
+        }).from(Reports).innerJoin(Users, eq(Reports.userId, Users.id)).orderBy(asc(Users.id))
+
+      return userReport
+        
+       
+        
+    } catch (error) {1
+        console.error('loi point', error);
+        return null
+    }
+}
+export async function createVoucher(
+   dataVoucher:any
+) {
+    try {
+        const [voucher] = await db.insert(Voucher).values(dataVoucher).returning().execute()
+        return voucher
+    }catch (error) {
+        console.error('loi tao voucher', error);
+        return null
+    }
+
+}
+export async function getAllVoucher(){
+    try {
+        const voucher = await db.select().from(Voucher).execute()
+        return voucher
+    } catch (error) {
+        console.error('loi get voucher', error);
+        return null
+    }
+}
+export async function getVoucherById(id:number){
+    try {
+        const [voucherId] = await db.select().from(Voucher).where(eq(Voucher.id,id)).execute()
+        return voucherId
+    } catch (error) {
+        console.error('loi get voucherId by id', error);
+        return null
+    }
+}
+export async function updateVoucherById(id:number,newsData:any){
+    try {
+        const updateVoucher = await db.update(Voucher).set(newsData).where(eq(Voucher.id,id)).execute()
+        return updateVoucher
+    } catch (error) {
+        console.error('loi update Voucher', error);
+        return null
+    }
+}
+export async function deleteVoucherById(id:number){
+    try {
+        const deleteVoucher = await db.delete(Voucher).where(eq(Voucher.id,id)).execute()
+        return true
+    } catch (error) {
+        console.error('loi deleta', error);
+        return false
+    }
+}
+export async function updateVoucherUserId(id:number,userId:number){
+    try {
+        const updateVoucher = await db.update(Voucher).set({userId}).where(eq(Voucher.id,id)).execute()
+        return updateVoucher
+    } catch (error) {
+        console.error('loi update Voucher', error);
+        return null
+    }
+}
+export async function getUserVoucher(){
+    try {
+     
+        const userVoucher = await db.select({
+            id:Voucher.id,
+            name:Users.name,
+            nameVoucher:Voucher.name,
+            description: Voucher.description,
+            content: Voucher.content,
+            point: Voucher.point,
+            createAt: Voucher.createAt,
+            status: Voucher.status
+        }).from(Voucher).leftJoin(Users, eq(Voucher.userId, Users.id))
+
+     return userVoucher
+       
+        
+       
+        
+    } catch (error) {1
+        console.error('loi point', error);
+        return null
+    }
+}
+export async function getHistoryRewards(id:number){
+    try {
+        
+        const historyRewards = await db.select({
+            name:Users.name,
+            amount: Transaction.amount,
+            description: Transaction.description,
+            date: Transaction.date,
+        }).from(Transaction).leftJoin(Users,eq(Users.id,id)).where(eq(Transaction.userId,id))
+       
+       return historyRewards
+        
+        
+       
+        
+    } catch (error) {1
+        console.error('loi point', error);
+        return null
+    }
+}
+export async function getVoucherUser(id:number){
+    try {
+        
+        const voucher = await db.select({
+            id:Voucher.id,
+            name:Voucher.name,
+            description: Voucher.description,
+            content: Voucher.content,
+            type:Voucher.status,
+            point:Voucher.point,
+        }).from(Voucher).where(eq(Voucher.userId,id))
+       
+       return voucher
+        
+        
+        
+       
+        
+    } catch (error) {1
+        console.error('loi getvoucher', error);
+        return null
+    }
+}
+export async function getCollect(){
+    try {
+        
+        const collect = await db.select({
+            name:Users.name,
+            amount:collectedWaste.amount,
+            date:collectedWaste.collectionDate,
+            location:Reports.location,
+            typeWaste:Reports.wasteType
+        }).from(collectedWaste).leftJoin(Users,eq(collectedWaste.collectorId,Users.id)).leftJoin(Reports,eq(collectedWaste.reportId,Reports.id))
+       
+        return collect
+        
+        
+        
+        
+       
+        
+    } catch (error) {1
+        console.error('loi getvoucher', error);
         return null
     }
 }

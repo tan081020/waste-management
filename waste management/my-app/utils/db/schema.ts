@@ -11,7 +11,7 @@ export const Users = pgTable('users', {
     name: varchar('name', { length: 255 }).notNull(),
     phone: varchar('phone',{length:10}),
     address: varchar('address',{length:200}),
-    role: varchar('role',{length:200}),
+    role: varchar('role',{length:200}).default('USER').notNull(),
     createAt: timestamp('created_at').defaultNow().notNull()
 
 })
@@ -68,4 +68,27 @@ export const Transaction = pgTable('transaction', {
     date: timestamp('date').defaultNow().notNull()
 
 
+})
+export const News = pgTable('news',{
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => Users.id).notNull(),
+    imageUrl: text('image_url'),
+    description: varchar('description', { length: 255 }).notNull(),
+    createAt: timestamp('created_at').defaultNow().notNull(),
+    content: text('content').notNull(),
+    author: varchar('author', { length: 255 }).notNull(),
+
+
+})
+export const Voucher = pgTable('voucher',{
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => Users.id),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: varchar('description', { length: 255 }).notNull(),
+    content: text('content').notNull(),
+    point: integer('point').notNull(),
+    createAt: timestamp('created_at').defaultNow().notNull(),
+    status: varchar('status', { length: 255 }).notNull().default('not_used'),
+
+ 
 })

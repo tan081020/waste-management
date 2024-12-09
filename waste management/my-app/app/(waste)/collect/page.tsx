@@ -18,7 +18,7 @@ type CollectionTask = {
   date: string
   collectorId: number | null
 }
-const ITEMS_PER_PAGE = 5
+const ITEMS_PER_PAGE = 10
 export default function CollectPage() {
   const [tasks, setTasks] = useState<CollectionTask[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,16 +36,16 @@ export default function CollectPage() {
           if (fetchchedUser) {
             setUser(fetchchedUser)
           } else {
-            toast.error('user ko dang nhap')
+            toast.error('Người Dùng chưa Đăng Nhập')
           }
         } else {
-          toast.error('user ko dang nhap')
+          toast.error('Người Dùng chưa Đăng Nhập')
         }
         const fetchChedTalk = await getWasteCollectionTalk()
         setTasks(fetchChedTalk as CollectionTask[])
       } catch (error) {
-        console.error("loi doc user va task", error);
-        toast.error('thu lai sau')
+        console.error("Lỗi đọc người dùng và nhiệm vụ", error);
+        toast.error('Thử lại sau')
 
       } finally {
         setLoading(false)
@@ -64,7 +64,7 @@ export default function CollectPage() {
   const [reward, setReward] = useState<number | null>(null)
   const handleStatusChange = async (taskId: number, newStatus: CollectionTask['status']) => {
     if (!user) {
-      toast.error('Please log in to collect waste.')
+      toast.error('Vui lòng đăng nhập để thu gom rác thải.')
       return
     }
 
@@ -74,13 +74,13 @@ export default function CollectPage() {
         setTasks(tasks.map(task =>
           task.id === taskId ? { ...task, status: newStatus, collectorId: user.id } : task
         ))
-        toast.success('Task status updated successfully')
+        toast.success('Trạng thái nhiệm vụ được cập nhật thành công')
       } else {
-        toast.error('Failed to update task status. Please try again.')
+        toast.error('Không cập nhật được trạng thái nhiệm vụ. Vui lòng thử lại.')
       }
     } catch (error) {
-      console.error('Error updating task status:', error)
-      toast.error('Failed to update task status. Please try again.')
+      console.error('Lỗi cập nhật trạng thái tác vụ:', error)
+      toast.error('Không cập nhật được trạng thái nhiệm vụ. Vui lòng thử lại.')
     }
   }
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +99,7 @@ export default function CollectPage() {
   }
   const handleVerify = async () => {
     if (!selectedTask || !verificationImage || !user) {
-      toast.error('Missing required information for verification.')
+      toast.error('Thiếu thông tin cần thiết để xác minh.')
       return
     }
 
@@ -160,7 +160,7 @@ export default function CollectPage() {
 
         if (parsedResult.wasteTypeMatch && numberCollect <= numberReports && parsedResult.confidence > 0.5) {
           await handleStatusChange(selectedTask.id, 'verified')
-          const earnedReward = Math.floor(Math.random() * 50) + 10 // Random reward between 10 and 59
+          const earnedReward = Math.floor(Math.random() * 50) + 20 // Random reward between 10 and 59
 
           // Save the reward
           await saveReward(user.id, earnedReward)
@@ -169,7 +169,7 @@ export default function CollectPage() {
           await saveCollectedWaste(selectedTask.id, user.id, parsedResult,parsedResult.quantity)
 
           setReward(earnedReward)
-          toast.success(`Verification successful! You earned ${earnedReward} tokens!`, {
+          toast.success(`Xác minh thành công! Bạn đã kiếm được ${earnedReward} tokens!`, {
             duration: 5000,
             position: 'top-center',
           })
@@ -200,8 +200,9 @@ export default function CollectPage() {
     currentPage * ITEMS_PER_PAGE
   )
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Waste Collection Tasks</h1>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto ">
+      <MapPin className="w-6 h-6 mr-2 text-green-500" />
+      <h1 className="text-3xl font-semibold mb-6 text-green-500">Nhiệm vụ thu gom rác thải</h1>
 
       <div className="mb-4 flex items-center">
         <Input
@@ -212,7 +213,7 @@ export default function CollectPage() {
           className="mr-2"
         />
         <Button variant="outline" size="icon">
-          <Search className="h-4 w-4" />
+          <Search className="h-9 w-9" />
         </Button>
       </div>
 
@@ -260,19 +261,24 @@ export default function CollectPage() {
                 <div className="flex justify-end">
                   {task.status === 'pending' && (
                     <Button onClick={() => handleStatusChange(task.id, 'in_progress')} variant="outline" size="sm">
-                      Start Collection
+                      Bắt đầu bộ sưu tập
                     </Button>
                   )}
-                  {task.status === 'in_progress' && task.collectorId === user?.id && (
+                  {/* {task.status === 'in_progress' && task.collectorId === user?.id && (
                     <Button onClick={() => setSelectedTask(task)} variant="outline" size="sm">
-                      Complete & Verify
+                      Hủy nhiệm vụ
+                    </Button>
+                  )} */}
+                    {task.status === 'in_progress' && task.collectorId === user?.id && (
+                    <Button onClick={() => setSelectedTask(task)} variant="outline" size="sm">
+                      Hoàn tất & Xác minh
                     </Button>
                   )}
                   {task.status === 'in_progress' && task.collectorId !== user?.id && (
-                    <span className="text-yellow-600 text-sm font-medium">In progress by another collector</span>
+                    <span className="text-yellow-600 text-sm font-medium">Đang được thực hiện bởi một nhà sưu tập khác</span>
                   )}
                   {task.status === 'verified' && (
-                    <span className="text-green-600 text-sm font-medium">Reward Earned</span>
+                    <span className="text-green-600 text-sm font-medium">Phần thưởng kiếm được</span>
                   )}
                 </div>
               </div>
@@ -285,7 +291,7 @@ export default function CollectPage() {
               disabled={currentPage === 1}
               className="mr-2"
             >
-              Previous
+              Trước
             </Button>
             <span className="mx-2 self-center">
               Page {currentPage} of {pageCount}
@@ -295,7 +301,7 @@ export default function CollectPage() {
               disabled={currentPage === pageCount}
               className="ml-2"
             >
-              Next
+              Kế tiếp
             </Button>
           </div>
         </>
@@ -304,11 +310,12 @@ export default function CollectPage() {
       {selectedTask && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold mb-4">Verify Collection</h3>
-            <p className="mb-4 text-sm text-gray-600">Upload a photo of the collected waste to verify and earn your reward.</p>
+            <h3 className="text-xl font-semibold mb-4">Xác minh bộ sưu tập</h3>
+            <p className="mb-4 text-sm text-gray-600">
+            Tải ảnh rác thải đã thu thập lên để xác minh và nhận phần thưởng.</p>
             <div className="mb-4">
               <label htmlFor="verification-image" className="block text-sm font-medium text-gray-700 mb-2">
-                Upload Image
+              Tải hình ảnh lên
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
@@ -318,7 +325,7 @@ export default function CollectPage() {
                       htmlFor="verification-image"
                       className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                     >
-                      <span>Upload a file</span>
+                      <span>Tải lên một tập tin</span>
                       <input id="verification-image" name="verification-image" type="file" className="sr-only" onChange={handleImageUpload} accept="image/*" />
                     </label>
                   </div>
@@ -337,7 +344,7 @@ export default function CollectPage() {
               {verificationStatus === 'verifying' ? (
                 <>
                   <Loader className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                  Verifying...
+                  Đang xác minh...
                 </>
               ) : 'Verify Collection'}
             </Button>
@@ -349,7 +356,7 @@ export default function CollectPage() {
               </div>
             )}
             {verificationStatus === 'failure' && (
-              <p className="mt-2 text-red-600 text-center text-sm">Verification failed. Please try again.</p>
+              <p className="mt-2 text-red-600 text-center text-sm">Xác minh không thành công. Vui lòng thử lại.</p>
             )}
             <Button onClick={() => setSelectedTask(null)} variant="outline" className="w-full mt-2">
               Close
@@ -358,12 +365,7 @@ export default function CollectPage() {
         </div>
       )}
 
-      {/* Add a conditional render to show user info or login prompt */}
-      {/* {user ? (
-            <p className="text-sm text-gray-600 mb-4">Logged in as: {user.name}</p>
-          ) : (
-            <p className="text-sm text-red-600 mb-4">Please log in to collect waste and earn rewards.</p>
-          )} */}
+    
     </div>
   )
 }

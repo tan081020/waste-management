@@ -50,7 +50,7 @@ export default function ReportPage() {
         libraries: libraries
     });
 
-   
+
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setNewReports({ ...newReports, [name]: value })
@@ -80,7 +80,7 @@ export default function ReportPage() {
         }
     };
 
-    
+
     // Hàm chọn gợi ý
     const handleSuggestionClick = (suggestion: {
         description: React.SetStateAction<string>;
@@ -101,6 +101,7 @@ export default function ReportPage() {
             reader.readAsDataURL(selectedFile)
         }
     }
+    console.log('preview', preview);
 
     const readFileAsBase = (file: File): Promise<String> => {
         return new Promise((resolve, reject) => {
@@ -147,7 +148,7 @@ export default function ReportPage() {
 
             const json = `${text.slice(8, -4)}`
 
-         console.log(json);
+            console.log(json);
 
 
             try {
@@ -206,11 +207,11 @@ export default function ReportPage() {
             setVerificationStatus('idle')
             setVerificationResult(null)
 
-            toast.success('bao cao rac thanh cong')
+            toast.success('Báo cáo rác thành công')
 
         } catch (error) {
-            console.error('loi ko the bao cao rac', error);
-            toast.error("ban thu lai sao")
+            console.error('Lỗi Không Thể Báo Cáo Rác', error);
+            toast.error("Bạn vui lòng thử lại")
         } finally {
             setIsSubmitting(false)
         }
@@ -240,13 +241,35 @@ export default function ReportPage() {
 
     return (
         <div className=" p-8 max-w-4xl mx-auto">
-            <h1 className=" text-3xl font-semibold mb-6 text-gray-800">
-                bao cao rac
+            <h1 className="text-4xl font-extrabold mb-6 text-gray-900 flex items-center space-x-3">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-10 h-10 text-green-600"
+                >
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 3h6a1 1 0 011 1v1h3a1 1 0 011 1v1H4V6a1 1 0 011-1h3V4a1 1 0 011-1zm-4 6h14m-1 0a1 1 0 00-.986-.835l-1.218 12.183A2 2 0 0113.795 21H10.21a2 2 0 01-1.986-1.652L7.007 10.165A1 1 0 007 10z"
+                    />
+                </svg>
+                <span className="text-gradient bg-gradient-to-r from-green-500 to-blue-500 text-transparent bg-clip-text ">
+                    Báo Cáo Rác
+                </span>
             </h1>
-            <form onSubmit={handleSubmit} className=" bg-white p-8 rounded-2xl shadow-lg mb-12">
+            <form
+                onSubmit={handleSubmit}
+                className=" bg-white p-8 rounded-2xl shadow-lg mb-12"
+            >
                 <div className="mb-8">
-                    <label htmlFor="waste-image" className="block text-lg font-medium text-gray-700 mb-2">
-                        Upload Waste Image
+                    <label
+                        htmlFor="waste-image"
+                        className="block text-lg font-medium text-gray-700 mb-2"
+                    >
+                        Tải lên hình ảnh lãng phí
                     </label>
                     <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-green-500 transition-colors duration-300">
                         <div className="space-y-1 text-center">
@@ -256,10 +279,17 @@ export default function ReportPage() {
                                     htmlFor="waste-image"
                                     className="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-green-500"
                                 >
-                                    <span>Upload a file</span>
-                                    <input id="waste-image" name="waste-image" type="file" className="sr-only" onChange={handleFileChange} accept="image/*" />
+                                    <span>Tải lên một tập tin</span>
+                                    <input
+                                        id="waste-image"
+                                        name="waste-image"
+                                        type="file"
+                                        className="sr-only"
+                                        onChange={handleFileChange}
+                                        accept="image/*"
+                                    />
                                 </label>
-                                <p className="pl-1">or drag and drop</p>
+                                <p className="pl-1"> kéo và thả</p>
                             </div>
                             <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
                         </div>
@@ -267,7 +297,11 @@ export default function ReportPage() {
                 </div>
                 {preview && (
                     <div className="mt-4 mb-8">
-                        <img src={preview} alt="Waste preview" className="max-w-full h-auto rounded-xl shadow-md" />
+                        <img
+                            src={preview}
+                            alt="Waste preview"
+                            className="max-w-full h-auto rounded-xl shadow-md"
+                        />
                     </div>
                 )}
                 <Button
@@ -278,9 +312,14 @@ export default function ReportPage() {
                 >
                     {verificationStatus === "verifying" ? (
                         <>
-                            <Loader className=" animate-spin -ml-1 mr-3 h-5 w-5 text-white"> verifying...</Loader>
+                            <Loader className=" animate-spin -ml-1 mr-3 h-5 w-5 text-white">
+                                {" "}
+                                Đang xác minh...
+                            </Loader>
                         </>
-                    ) : "Verify waste"}
+                    ) : (
+                        "Verify waste"
+                    )}
                 </Button>
 
                 {verificationStatus === "sucess" && verificationResult && (
@@ -288,11 +327,16 @@ export default function ReportPage() {
                         <div className="flex items-center">
                             <CheckCircle className="h-6 w-6 text-green-400 mr-3" />
                             <div>
-                                <h3 className="text-lg font-medium text-green-800">Verification Successful</h3>
+                                <h3 className="text-lg font-medium text-green-800">
+                                    Xác minh thành công
+                                </h3>
                                 <div className="mt-2 text-sm text-green-700">
-                                    <p>Waste Type: {verificationResult.wasteType}</p>
-                                    <p>Quantity: {verificationResult.quantity}</p>
-                                    <p>Confidence: {(verificationResult.confidence * 100).toFixed(2)}%</p>
+                                    <p>Loại chất thải: {verificationResult.wasteType}</p>
+                                    <p>Số lượng: {verificationResult.quantity}</p>
+                                    <p>
+                                        Sự tự tin:{" "}
+                                        {(verificationResult.confidence * 100).toFixed(2)}%
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -300,15 +344,13 @@ export default function ReportPage() {
                 )}
 
                 <div className=" grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            
-                <div>
+                    <div>
                         <label
                             htmlFor="location"
                             className=" block text-sm font-medium text-gray-700 mb-1"
                         >
                             Vị trí
                         </label>
-
 
                         <input
                             id="location"
@@ -320,6 +362,7 @@ export default function ReportPage() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 transition-all duration-300"
                         />
 
+                        {/* Hiển thị gợi ý địa điểm */}
                         {suggestions.length > 0 && (
                             <ul
                                 style={{
@@ -348,9 +391,13 @@ export default function ReportPage() {
                             </ul>
                         )}
                     </div>
-                    
                     <div>
-                        <label htmlFor="type" className="block text-sm font-medium text-gray-700 mb-1">Waste Type</label>
+                        <label
+                            htmlFor="type" //chọn giá trị
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Loại chất thải
+                        </label>
                         <input
                             type="text"
                             id="type"
@@ -364,7 +411,12 @@ export default function ReportPage() {
                         />
                     </div>
                     <div>
-                        <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">Estimated Amount</label>
+                        <label
+                            htmlFor="amount"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                            Số lượng ước tính
+                        </label>
                         <input
                             type="text"
                             id="amount"
@@ -386,33 +438,54 @@ export default function ReportPage() {
                     {isSubmitting ? (
                         <>
                             <Loader className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-                            Submitting...
+                            Đang gửi...
                         </>
-                    ) : 'Submit Report'}
+                    ) : (
+                        "Gửi Báo Cáo"
+                    )}
                 </Button>
             </form>
-            <h2 className="text-3xl font-semibold mb-6 text-gray-800">Recent Reports</h2>
+            <h2 className="text-gradient bg-gradient-to-r from-green-500 to-blue-500 text-transparent bg-clip-text">
+                Báo cáo gần đây
+            </h2>
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <div className="max-h-96 overflow-y-auto">
                     <table className="w-full">
                         <thead className="bg-gray-50 sticky top-0">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Vị trí
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Kiểu
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Số lượng
+                                </th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Ngày
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
                             {reports.map((report) => (
-                                <tr key={report.id} className="hover:bg-gray-50 transition-colors duration-200">
+                                <tr
+                                    key={report.id}
+                                    className="hover:bg-gray-50 transition-colors duration-200"
+                                >
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <MapPin className="inline-block w-4 h-4 mr-2 text-green-500" />
                                         {report.location}
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.wasteType}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.amount}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.createdAt}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {report.wasteType}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {report.amount}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {report.createdAt}
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

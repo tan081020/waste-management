@@ -8,7 +8,6 @@ import "../globals.css"
 import { Toaster } from 'react-hot-toast'
 import { getAvailableRewards, getUserByEmail } from '@/utils/db/actions'
 import Header from "@/components/ui/Header"
-import Sidebar from "@/components/ui/SideBar"
 import { usePathname, useRouter } from "next/navigation"
 import SideBarDashboard from "@/components/ui/SideBarDashboard"
 
@@ -20,7 +19,7 @@ export default function RootLayout({
   children
 }: {
   children: React.ReactNode,
- 
+
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [totalEarnings, setTotalEarnings] = useState(0)
@@ -60,7 +59,7 @@ export default function RootLayout({
           <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} totalEarings={totalEarnings} />
           <div className="flex flex-1">
 
-        <SideBarDashboard></SideBarDashboard>
+            <SideBarDashboard></SideBarDashboard>
             <main className="flex-1 p-4 lg:p-8 ml-0  transition-all duration-300">
               {children}
             </main>
