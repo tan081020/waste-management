@@ -21,7 +21,8 @@ type Result = {
 const Page = () => {
   const router = useRouter();
   const [allUsers, setAllUsers] = useState<Rewards[]>([]);
-
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [itemsPerPage] = useState(10); // Số dòng trên mỗi trang
   const result: { [userId: number]: Result } = {};
 
   // Tính tổng điểm cho mỗi người dùng
@@ -58,6 +59,19 @@ const Page = () => {
     };
     getAllUsers();
   }, []);
+    // Xác định các mục cần hiển thị trên trang hiện tại
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = output.slice(indexOfFirstItem, indexOfLastItem);
+  
+    // Hàm chuyển sang trang tiếp theo
+    const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Tính tổng số trang
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(output.length / itemsPerPage); i++) {
+    pageNumbers.push(i);
+  }
 
   return (
     <div className="container">
@@ -72,10 +86,10 @@ const Page = () => {
           </tr>
         </thead>
         <tbody>
-          {output.map((user, i) => {
+          {currentItems.map((user, i) => {
             return (
               <tr key={user.userId} className="table-row">
-                <td>{i + 1}</td>
+                <td>{indexOfFirstItem + i + 1}</td>
                 <td>{user.name}</td>
                 <td>{user.totalAmount}</td>
                 <td>
@@ -93,7 +107,27 @@ const Page = () => {
           })}
         </tbody>
       </table>
-
+   {/* Pagination Controls */}
+   <div className="flex justify-center mt-6">
+          <nav>
+            <ul className="flex gap-3">
+              {pageNumbers.map((number) => (
+                <li key={number}>
+                  <button
+                    onClick={() => paginate(number)}
+                    className={`px-5 py-2 text-sm font-semibold rounded-md transition-all ${
+                      currentPage === number
+                        ? "bg-green-600 text-white shadow-lg"
+                        : "bg-white text-green-600 border border-green-600 hover:bg-green-100"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       <style jsx>{`
         .container {
           max-width: 1200px;

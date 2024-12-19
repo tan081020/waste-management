@@ -1,9 +1,9 @@
-// @ts-nocheck
+
 'use client'
-import Image from "next/image";
-import { ArrowRight, Leaf, Recycle, User, Coins, MapPin, ChevronRight, Icon, UsersRound, Users } from "lucide-react";
+
+import { ArrowRight, Leaf, Recycle,  Coins, MapPin, UsersRound, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+
 import React, { useEffect, useState } from "react";
 import { getAllUser, getAmoutCollect, getPoint } from "@/utils/db/actions";
 import { useRouter } from "next/navigation";
@@ -21,10 +21,10 @@ const AnimatedGolbe = () => {
   )
 }
 export default function Home() {
-  const [amountCollect, setAmountCollcet] = useState()
-  const [location, setLocation] = useState()
-  const [point, setPoint] = useState()
-  const [users, setUsers] = useState()
+  const [amountCollect, setAmountCollcet] = useState<number>()
+  const [location, setLocation] = useState<number>()
+  const [point, setPoint] = useState<number>()
+  const [users, setUsers] = useState<number>()
   const router = useRouter()
 
 
@@ -37,7 +37,7 @@ export default function Home() {
     }, 0)
     const point = await getPoint()
     const sumPoint = point?.reduce((init, amoun) => {
-      const point = parseFloat(amoun.point)
+      const point = parseFloat(amoun.point as any)
       return init + point
     }, 0)
     const amountUser = await getAllUser()
@@ -86,13 +86,15 @@ export default function Home() {
         <h2 className=" text-4xl font-bold mb-12 text-center text-gray-800">Ảnh hưởng của chúng tôi</h2>
         <div className=" grid gap-6 md:grid-cols-4">
           <ImpactCard title="Chất thải đã thu thập" value={`${amountCollect} kg`} icon={Recycle}></ImpactCard>
-          <ImpactCard title="Địa điểm đã dọn" value={location} icon={MapPin}></ImpactCard>
-          <ImpactCard title="Điểm thưởng" value={point} icon={Coins}></ImpactCard>
-          <ImpactCard title="Thành viên đã tham gia" value={users} icon={Users}></ImpactCard>
+          <ImpactCard title="Địa điểm đã dọn" value={location as number} icon={MapPin}></ImpactCard>
+          <ImpactCard title="Điểm thưởng" value={point as number} icon={Coins}></ImpactCard>
+          <ImpactCard title="Thành viên đã tham gia" value={users as number} icon={Users}></ImpactCard>
 
         </div>
       </section>
+     
     </div>
+
   );
 }
 

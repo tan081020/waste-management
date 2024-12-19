@@ -21,7 +21,6 @@ type Voucher = {
 const Page = () => {
   const router = useRouter();
   const [allVoucher, setAllVoucher] = useState<Voucher[]>([]);
-  const [totalVouchers, setTotalVouchers] = useState<number>(0); // State mới để lưu tổng số voucher
   const [showUpload, setShowUpload] = useState<boolean>(false);
 
   // Hàm xóa voucher
@@ -44,18 +43,17 @@ const Page = () => {
       toast.error("Đã xảy ra lỗi");
     }
   };
-
+  const fetchAllVouchers = async () => {
+    try {
+      const vouchers = await getUserVoucher();
+      setAllVoucher(vouchers as Voucher[]);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      toast.error("Không thể lấy danh sách voucher");
+    }
+  }
   useEffect(() => {
-    const fetchAllVouchers = async () => {
-      try {
-        const vouchers = await getUserVoucher();
-        setAllVoucher(vouchers as Voucher[]);
-        setTotalVouchers(vouchers.length); // Cập nhật tổng số voucher
-      } catch (error) {
-        console.error("Error fetching vouchers:", error);
-        toast.error("Không thể lấy danh sách voucher");
-      }
-    };
+
 
     fetchAllVouchers();
   }, []);
@@ -69,115 +67,104 @@ const Page = () => {
   };
 
   return (
-    <div>
-      <div className="bg-white pb-4">
-        {/* Hiển thị tổng số voucher */}
-        <div className="text-center mb-4">
-          <h3 className="text-xl font-semibold">Tổng số voucher: {totalVouchers}</h3>
-        </div>
+    <div className="max-w-screen-lg mx-auto">
+      <div className="bg-white shadow-lg rounded-xl p-8 mb-8">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
+          Quản lý Voucher
+        </h1>
 
-        <table
-          className="w-full userTable"
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            margin: "20px 0",
-            fontSize: "14px",
-            borderRadius: "8px",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <thead>
-            <tr className="bg-green-500 text-white rounded-t-lg">
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Sr.</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Tên</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Mô tả</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Nội dung</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Điểm</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Tên người sở hữu</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Trạng thái</th>
-              <th style={{ padding: "12px 20px", textAlign: "left" }}>Ngày tạo</th>
-              <th style={{ padding: "12px 20px", textAlign: "center" }}>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allVoucher.map((voucher, i) => (
-              <tr key={voucher.id} style={{ backgroundColor: "#f9f9f9", borderBottom: "1px solid #ddd" }}>
-                <td style={{ padding: "12px 20px" }}>{i + 1}</td>
-                <td style={{ padding: "12px 20px" }}>{voucher.nameVoucher}</td>
-                <td style={{ padding: "12px 20px" }} style={ellipsisStyle}>
-                  {voucher.description}
-                </td>
-                <td style={{ padding: "12px 20px" }} style={ellipsisStyle}>
-                  {voucher.content}
-                </td>
-                <td style={{ padding: "12px 20px" }} style={ellipsisStyle}>
-                  {voucher.point}
-                </td>
-                <td style={{ padding: "12px 20px" }} style={ellipsisStyle}>
-                  {voucher.name === null ? "Chưa có ai sử dụng" : voucher.name}
-                </td>
-                <td style={{ padding: "12px 20px" }} style={ellipsisStyle}>
-                  {voucher.status === "not_used" ? "Chưa sử dụng" : "Đã sử dụng"}
-                </td>
-                <td style={{ padding: "12px 20px" }}>{new Date(voucher.createAt).toDateString()}</td>
-                <td style={{ padding: "12px 20px", textAlign: "center" }}>
-                  <button
-                    onClick={() => router.push(`/dashboard/voucher/${voucher.id}`)}
-                    style={{
-                      backgroundColor: "#4CAF50",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginRight: "8px",
-                    }}
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDeleteVoucher(voucher.id);
-                    }}
-                    style={{
-                      backgroundColor: "#f44336",
-                      color: "white",
-                      padding: "8px 16px",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Xóa
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto shadow-md rounded-lg">
+            <thead className="bg-green-600 text-white">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-medium">Sr.</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Tên</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Mô tả</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Nội dung</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Điểm</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Tên người sở hữu</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Trạng thái</th>
+                <th className="px-6 py-3 text-left text-sm font-medium">Ngày tạo</th>
+                <th className="px-6 py-3 text-center text-sm font-medium">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {allVoucher.map((voucher, i) => (
+                <tr key={voucher.id} className="bg-gray-50 border-b">
+                  <td className="px-6 py-3 text-sm">{i + 1}</td>
+                  <td className="px-6 py-3 text-sm truncate" style={{ maxWidth: '200px' }}>
+                    {voucher.nameVoucher}
+                  </td>
+
+                  {/* Mô tả với ellipsis */}
+                  <td className="px-6 py-3 text-sm truncate" style={{ maxWidth: '200px' }}>
+                    {voucher.description}
+                  </td>
+
+                  {/* Nội dung với ellipsis */}
+                  <td className="px-6 py-3 text-sm truncate" style={{ maxWidth: '250px' }}>
+                    {voucher.content}
+                  </td>
+
+                  {/* Điểm với ellipsis */}
+                  <td className="px-6 py-3 text-sm truncate" style={{ maxWidth: '100px' }}>
+                    {voucher.point}
+                  </td>
+
+                  {/* Tên người sở hữu với ellipsis */}
+                  <td className="px-6 py-3 text-sm truncate" style={{ maxWidth: '200px' }}>
+                    {voucher.name === null ? "Chưa có ai sử dụng" : voucher.name}
+                  </td>
+
+                  {/* Trạng thái */}
+                  <td className="px-6 py-3 text-sm truncate">
+                    {voucher.status === "not_used" ? "Chưa sử dụng" : "Đã sử dụng"}
+                  </td>
+
+                  <td className="px-6 py-3 text-sm">{new Date(voucher.createAt).toDateString()}</td>
+
+                  <td className="px-4 py-2 flex">
+                    <button
+                      className="bg-green-200 text-green-800 px-4 py-2 rounded-full hover:bg-green-500 hover:text-white transition duration-300 ease-in-out mr-2"
+                      onClick={() => router.push(`/dashboard/voucher/${voucher.id}`)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="bg-red-200 text-red-800 px-4 py-2 rounded-full hover:bg-red-500 hover:text-white transition duration-300 ease-in-out"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleDeleteVoucher(voucher.id);
+                      }}
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div style={{ textAlign: "center", margin: "20px 0" }}>
+
+
+
+      <div className="text-center my-6">
         <button
           onClick={() => setShowUpload((prev) => !prev)}
-          style={{
-            backgroundColor: "#4CAF50",
-            color: "white",
-            border: "none",
-            padding: "10px 20px",
-            fontSize: "16px",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
+          className="bg-green-500 text-white py-2 px-6 text-lg font-semibold rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-300"
         >
           {showUpload ? "Đóng" : "Thêm voucher"}
         </button>
+
         {showUpload && (
-          <div style={{ marginTop: "20px" }}>
+          <div className="mt-6">
             <UpLoadVoucher />
           </div>
         )}
       </div>
+
     </div>
   );
 };

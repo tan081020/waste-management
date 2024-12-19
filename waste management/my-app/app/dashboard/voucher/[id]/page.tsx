@@ -31,14 +31,14 @@ const page = () => {
  
   const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, name } = e.target
-    setVoucher(pre => ({
+    setVoucher((pre:any) => ({
       ...pre,
       [name]: value
     }))
   }
   const handleOnchangeArea = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { value, name } = e.target
-    setVoucher(pre => ({
+    setVoucher((pre:any) => ({
       ...pre,
       [name]: value
     }))
@@ -80,15 +80,16 @@ const page = () => {
 
     }
   }, [idstring])
-  console.log(voucher);
-  
-  return (
-    <div style={{ width: '400px', margin: 'auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
-    <h1>Đăng Voucher</h1>
-    <form onSubmit={handleSubmit}>
 
-      <div>
-        <label htmlFor="name">Tên voucher</label>
+  return (
+    <div className="max-w-lg mx-auto p-6 bg-white border border-gray-300 rounded-lg shadow-lg">
+    <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
+      Chỉnh sửa Voucher
+    </h1>
+    <form onSubmit={handleSubmit}>
+  
+      <div className="mb-4">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Tên voucher</label>
         <input
           type="text"
           id="name"
@@ -96,67 +97,66 @@ const page = () => {
           value={voucher.name}
           onChange={handleOnchange}
           required
-          style={{ width: '100%', padding: '8px', margin: '5px 0', borderRadius: '4px', border: '1px solid #ccc' }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
-      <div>
-        <label htmlFor="description">Mô tả</label>
+  
+      <div className="mb-4">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Mô tả</label>
         <input
           type="text"
           id="description"
           name="description"
           value={voucher.description}
           onChange={handleOnchange}
-
           required
-          style={{ width: '100%', padding: '8px', margin: '5px 0', borderRadius: '4px', border: '1px solid #ccc' }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
-      <div>
-        <label htmlFor="point">Điểm</label>
+  
+      <div className="mb-4">
+        <label htmlFor="point" className="block text-sm font-medium text-gray-700 mb-2">Điểm</label>
         <input
           type="text"
           id="point"
           name="point"
           value={voucher.point}
           onChange={handleOnchange}
-
           required
-          style={{ width: '100%', padding: '8px', margin: '5px 0', borderRadius: '4px', border: '1px solid #ccc' }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
         />
       </div>
-
-      <div>
-        <label htmlFor="content">Nội Dung:</label>
+  
+      <div className="mb-4">
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">Nội Dung</label>
         <textarea
           id="content"
           name="content"
           value={voucher.content}
           onChange={handleOnchangeArea}
-
           required
-          style={{ width: '100%', padding: '8px', margin: '5px 0', borderRadius: '4px', border: '1px solid #ccc', height: '150px' }}
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 h-36"
         />
       </div>
-
-
-
-      <div>
+  
+      <div className="flex justify-center">
         <button
           type="submit"
-          style={{ backgroundColor: '#4CAF50', color: 'white', border: 'none', padding: '10px 20px', fontSize: '16px', cursor: 'pointer', borderRadius: '4px', display: 'flex',alignItems: 'center',justifyContent: 'center', gap: '10px', }}
+          className="bg-green-500 text-white px-6 py-3 rounded-md text-lg font-medium disabled:opacity-50 hover:bg-green-600 transition duration-300 ease-in-out flex items-center justify-center gap-2"
           disabled={isSubmitting}
         >
           {isSubmitting ? (
             <>
               <Loader className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
-               Đang chỉnh sữa ....
+              Đang chỉnh sửa ....
             </>
-          ) : 'chỉnh sữa'}
+          ) : 'Chỉnh sửa'}
         </button>
       </div>
+  
     </form>
   </div>
+  
   )
 }
 

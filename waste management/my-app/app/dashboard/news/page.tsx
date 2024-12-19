@@ -55,82 +55,70 @@ const Page = () => {
   };
 
   return (
-    <div>
-      <div className='bg-white pb-4'>
-        <table
-          className='w-full userTable'
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            margin: '20px 0',
-            fontSize: '14px',
-            borderRadius: '8px',
-            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
-          }}
-        >
-          <thead>
-            <tr className='bg-green-500 text-white rounded-t-lg'>
-              <th style={{ padding: '12px 20px', textAlign: 'left' }}>Sr.</th>
-              <th style={{ padding: '12px 20px', textAlign: 'left' }}>Tác giả</th>
-              <th style={{ padding: '12px 20px', textAlign: 'left' }}>Mô tả</th>
-              <th style={{ padding: '12px 20px', textAlign: 'left' }}>Nội dung</th>
-              <th style={{ padding: '12px 20px', textAlign: 'left' }}>Ngày tạo</th>
-              <th style={{ padding: '12px 20px', textAlign: 'center' }}>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allNews.map((news, i) => (
-              <tr key={i} style={{ backgroundColor: '#f9f9f9', borderBottom: '1px solid #ddd' }}>
-                <td style={{ padding: '12px 20px' }}>{i + 1}</td>
-                <td style={{ padding: '12px 20px' }}>{news?.author}</td>
-                <td style={{ padding: '12px 20px' }} style={ellipsisStyle}>{news?.description}</td>
-                <td style={{ padding: '12px 20px' }} style={ellipsisStyle}>{news?.content}</td>
-                <td style={{ padding: '12px 20px' }}>{new Date(news?.createAt).toDateString()}</td>
-                <td style={{ padding: '12px 20px', textAlign: 'center' }}>
-                  <button
-                    onClick={() => router.push(`/dashboard/news/${news.id}`)}
-                    style={{ backgroundColor: '#4CAF50', color: 'white', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer', marginRight: '8px' }}
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleDeleteNews(news.id);
-                    }}
-                    style={{ backgroundColor: '#f44336', color: 'white', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="bg-white pb-4">
+    <table className="w-full table-auto border-collapse shadow-md rounded-lg mt-5">
+      <thead>
+        <tr className="bg-green-500 text-white text-left rounded-t-lg">
+          <th className="px-4 py-3">Sr.</th>
+          <th className="px-4 py-3">Tác giả</th>
+          <th className="px-4 py-3">Mô tả</th>
+          <th className="px-4 py-3">Nội dung</th>
+          <th className="px-4 py-3">Ngày tạo</th>
+          <th className="px-4 py-3 text-center">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        {allNews.map((news, i) => (
+          <tr key={i} className="bg-gray-50 border-b hover:bg-gray-100">
+            <td className="px-4 py-3">{i + 1}</td>
+            <td className="px-4 py-3">{news?.author}</td>
+            
+            {/* Mô tả với ellipsis */}
+            <td className="px-4 py-3 truncate" style={{ maxWidth: '200px' }}>{news?.description}</td>
+            
+            {/* Nội dung với ellipsis */}
+            <td className="px-4 py-3 truncate" style={{ maxWidth: '250px' }}>{news?.content}</td>
+            
+            <td className="px-4 py-3">{new Date(news?.createAt).toDateString()}</td>
+            <td className="px-4 py-3 text-center">
+              <button
+                onClick={() => router.push(`/dashboard/news/${news.id}`)}
+                className="bg-green-500 text-white py-1 px-4 rounded-lg hover:bg-green-600 transition"
+              >
+                Sửa
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDeleteNews(news.id);
+                }}
+                className="bg-red-500 text-white py-1 px-4 rounded-lg hover:bg-red-600 transition ml-2"
+              >
+                Xóa
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <div className="text-center my-5">
+    <button
+      onClick={() => setShowUpload((prev) => !prev)}
+      className="bg-green-500 text-white py-2 px-6 text-lg rounded-lg hover:bg-green-600 transition"
+    >
+      {showUpload ? "Đóng" : "Thêm bài viết"}
+    </button>
+    {showUpload && (
+      <div className="mt-5">
+        <UploadNews />
       </div>
-
-      <div style={{ textAlign: 'center', margin: '20px 0' }}>
-        <button
-          onClick={() => setShowUpload((prev) => !prev)}
-          style={{
-            backgroundColor: '#4CAF50',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            fontSize: '16px',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          {showUpload ? 'Đóng' : 'Thêm bài viết'}
-        </button>
-        {showUpload && (
-          <div style={{ marginTop: '20px' }}>
-            <UploadNews />
-          </div>
-        )}
-      </div>
-    </div>
+    )}
+  </div>
+  </div>
+  
+ 
+  
+  
   );
 };
 

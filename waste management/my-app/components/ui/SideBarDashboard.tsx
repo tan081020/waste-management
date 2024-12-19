@@ -22,12 +22,11 @@ const SideBarDashboard = () => {
     const getUser = async () => {
       try {
         const email = localStorage.getItem("userEmail")
-        console.log(email);
-        
+
         if(email){
 
           const fetchUser = await getUserByEmail(email)
-          console.log(fetchUser);
+
           
           setUser(fetchUser)
         }

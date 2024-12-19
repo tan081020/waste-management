@@ -53,37 +53,39 @@ export default function ManagementReport() {
     <div className="max-w-screen-lg mx-auto">
       <div className="bg-white shadow-lg rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-          Báo cáo rác
+         Quản lý Báo cáo rác
         </h1>
 
-        <table className="w-full table-auto shadow-md rounded-lg">
-          <thead className="bg-green-600 text-white">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-medium">Sr.</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Name</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Địa chỉ</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Số lượng</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Trạng thái</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Loại rác</th>
-              <th className="px-6 py-3 text-left text-sm font-medium">Create Date</th>
+        <div className="overflow-x-auto">
+      <table className="min-w-full table-auto shadow-md rounded-lg">
+        <thead className="bg-green-600 text-white">
+          <tr>
+            <th className="px-6 py-3 text-left text-sm font-medium">Sr.</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Name</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Địa chỉ</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Số lượng</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Trạng thái</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Loại rác</th>
+            <th className="px-6 py-3 text-left text-sm font-medium">Create Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {currentItems.map((user, i) => (
+            <tr key={i} className="border-b hover:bg-gray-50">
+              <td className="px-6 py-4 text-sm">{indexOfFirstItem + i + 1}</td>
+              <td className="px-6 py-4 text-sm">{user?.name}</td>
+              <td className="px-6 py-4 text-sm">{user?.location}</td>
+              <td className="px-6 py-4 text-sm">Khoảng {user?.amount}</td>
+              <td className="px-6 py-4 text-sm">{user?.status}</td>
+              <td className="px-6 py-4 text-sm">{user?.wasteType}</td>
+              <td className="px-6 py-4 text-sm">
+                {new Date(user?.createAt).toDateString()}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {currentItems.map((user, i) => (
-              <tr key={i} className="border-b hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm">{indexOfFirstItem + i + 1}</td>
-                <td className="px-6 py-4 text-sm">{user?.name}</td>
-                <td className="px-6 py-4 text-sm">{user?.location}</td>
-                <td className="px-6 py-4 text-sm">{user?.amount}</td>
-                <td className="px-6 py-4 text-sm">{user?.status}</td>
-                <td className="px-6 py-4 text-sm">{user?.wasteType}</td>
-                <td className="px-6 py-4 text-sm">
-                  {new Date(user?.createAt).toDateString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          ))}
+        </tbody>
+      </table>
+    </div>
 
         {/* Pagination Controls */}
         <div className="flex justify-center mt-6">
@@ -110,7 +112,7 @@ export default function ManagementReport() {
         {/* Total Amount */}
         <div className="block max-w-sm p-6 bg-green-500 border border-gray-200 rounded-lg shadow-lg mt-6">
           <h5 className="mb-2 text-xl font-bold text-white">Tổng rác Báo cáo</h5>
-          <p className="font-normal text-white">{sum} kg</p>
+          <p className="font-normal text-white">Khoảng {sum}kg</p>
         </div>
       </div>
     </div>

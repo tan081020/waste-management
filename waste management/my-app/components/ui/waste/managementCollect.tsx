@@ -52,7 +52,7 @@ export default function ManagementCollect() {
     <div className="max-w-screen-lg mx-auto">
       <div className="bg-white shadow-lg rounded-xl p-8 mb-8">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6 text-center">
-          Báo cáo thu gom rác
+          Quản lý rác thải thu gom 
         </h1>
 
         <table className="w-full table-auto shadow-md rounded-lg">
@@ -72,7 +72,7 @@ export default function ManagementCollect() {
                 <td className="px-6 py-4 text-sm">{indexOfFirstItem + i + 1}</td>
                 <td className="px-6 py-4 text-sm">{user?.name}</td>
                 <td className="px-6 py-4 text-sm">{user?.location}</td>
-                <td className="px-6 py-4 text-sm">{user?.amount}</td>
+                <td className="px-6 py-4 text-sm">Khoảng {user?.amount}</td>
                 <td className="px-6 py-4 text-sm">{user?.typeWaste}</td>
                 <td className="px-6 py-4 text-sm">
                   {new Date(user?.date).toDateString()}
@@ -107,7 +107,7 @@ export default function ManagementCollect() {
         {/* Total Amount */}
         <div className="block max-w-sm p-6 bg-green-500 border border-gray-200 rounded-lg shadow-lg mt-6">
           <h5 className="mb-2 text-xl font-bold text-white">Tổng rác thu gom</h5>
-          <p className="font-normal text-white">{sum} kg</p>
+          <p className="font-normal text-white">Khoảng {sum}kg</p>
         </div>
       </div>
     </div>

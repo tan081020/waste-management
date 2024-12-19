@@ -4,9 +4,10 @@
 
 import { NewsItem } from "@/public/types/new";
 import { useState } from "react";
-import CategoryFilter from "./CategoryFilter";
+
 import SearchBar from "./SearchBar";
 import NewsCard from "../NewsCard";
+import { Loader } from "lucide-react";
 
 const NewsList = ({ news }: { news: NewsItem[] }) => {
   const [searchTerm, setSearchTerm] = useState(""); // state để lưu trữ từ khoá tìm kiếm
@@ -16,9 +17,6 @@ const NewsList = ({ news }: { news: NewsItem[] }) => {
     setSearchTerm(searchTerm);
   };
 
-  const handleCategoryChange = (category: string) => {
-    setCategory(category);
-  };
 
   // Lọc danh sách tin tức theo từ khoá tìm kiếm và danh mục
   const filteredNews = news.filter((item) => {
@@ -31,21 +29,24 @@ const NewsList = ({ news }: { news: NewsItem[] }) => {
   });
 
   return (
-    <div className="container">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-12 mb-5 ">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 md:gap-12 mb-5">
         <SearchBar onSearch={handleSearch} />
-      <CategoryFilter onCategoryChange={handleCategoryChange} />
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 justify-between">
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredNews.length > 0 ? (
           filteredNews.map((item: NewsItem) => (
             <NewsCard key={item.id} item={item} />
           ))
         ) : (
-          <div className="text-center text-gray-500">Không tìm thấy tin tức</div>
+          <div className="flex justify-center items-center col-span-full">
+            <Loader className="animate-spin h-16 w-16 text-teal-500" />
+          </div>
         )}
       </div>
     </div>
+
   );
 };
 

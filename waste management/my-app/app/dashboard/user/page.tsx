@@ -1,6 +1,6 @@
 "use client";
 
-import ChangeUserRole from '@/components/ui/ChangeUser';
+import ChangeUserRole from '@/components/ui/user/ChangeUser';
 import { deleteUser, getAllUser } from '@/utils/db/actions';
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -19,6 +19,8 @@ const Page = () => {
   const [allUsers, setAllUsers] = useState<allUsers[]>([]);
   const [openUpdateUser, setOpenUpdateUser] = useState(false);
   const [email, setEmail] = useState('');
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [itemsPerPage] = useState(10); // Số dòng trên mỗi trang
 
   const handleClose = () => {
     setOpenUpdateUser(false);
@@ -34,13 +36,14 @@ const Page = () => {
     if (!isConfirmed) return;
 
     try {
-      const deleteResult = await deleteUser(email);
-      if (deleteResult) {
-        toast.success('Xóa người dùng thành công');
-        setAllUsers((prevUsers) => prevUsers.filter((user) => user.email !== email));
-      } else {
-        toast.error('Xóa người dùng thất bại');
-      }
+      // const deleteResult = await deleteUser(email);
+      // if (deleteResult) {
+      //   toast.success('Xóa người dùng thành công');
+      //   setAllUsers((prevUsers) => prevUsers.filter((user) => user.email !== email));
+      // } else {
+      //   toast.error('Xóa người dùng thất bại');
+      // }
+      toast.error(' xóa người dùng thất bạibại')
     } catch (error) {
       console.error('Lỗi khi xóa người dùng:', error);
       toast.error('Đã xảy ra lỗi');
@@ -50,7 +53,19 @@ const Page = () => {
   useEffect(() => {
     getAllUsers();
   }, []);
+  // Xác định các mục cần hiển thị trên trang hiện tại
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = allUsers.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Hàm chuyển sang trang tiếp theo
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Tính tổng số trang
+  const pageNumbers = [];
+  for (let i = 1; i <= Math.ceil(allUsers.length / itemsPerPage); i++) {
+    pageNumbers.push(i);
+  }
   return (
     <div className="bg-white pb-8 px-4">
       <h1 className="text-2xl font-semibold text-gray-700 mb-4 animate-textChange">Quản lý người dùng</h1>
@@ -66,9 +81,9 @@ const Page = () => {
           </tr>
         </thead>
         <tbody>
-          {allUsers.map((user, i) => (
+          {currentItems.map((user, i) => (
             <tr key={i} className="border-b hover:bg-gray-100">
-              <td className="px-4 py-2">{i + 1}</td>
+              <td className="px-4 py-2">{indexOfFirstItem + i + 1}</td>
               <td className="px-4 py-2">{user?.name}</td>
               <td className="px-4 py-2">{user?.email}</td>
               <td className="px-4 py-2">{user?.role}</td>
@@ -94,7 +109,26 @@ const Page = () => {
           ))}
         </tbody>
       </table>
-
+      <div className="flex justify-center mt-6">
+          <nav>
+            <ul className="flex gap-3">
+              {pageNumbers.map((number) => (
+                <li key={number}>
+                  <button
+                    onClick={() => paginate(number)}
+                    className={`px-5 py-2 text-sm font-semibold rounded-md transition-all ${
+                      currentPage === number
+                        ? "bg-green-600 text-white shadow-lg"
+                        : "bg-white text-green-600 border border-green-600 hover:bg-green-100"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
       {openUpdateUser && (
         <ChangeUserRole email={email} onclose={handleClose} onfuc={getAllUsers} />
       )}

@@ -4,11 +4,8 @@ import { useState, useEffect } from "react"
 import { Inter } from 'next/font/google'
 import "../globals.css"
 
-// import 'leaflet/dist/leaflet.css'
 import { Toaster } from 'react-hot-toast'
-import { getAvailableRewards, getUserByEmail } from '@/utils/db/actions'
 import Header from "@/components/ui/Header"
-import { usePathname, useRouter } from "next/navigation"
 import SideBarDashboard from "@/components/ui/SideBarDashboard"
 
 
@@ -22,41 +19,13 @@ export default function RootLayout({
 
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [totalEarnings, setTotalEarnings] = useState(0)
-  const [isLogin, setIslogin] = useState(true)
-  const pathname = usePathname()
-  const [role, setRole] = useState('')
-  const router = useRouter()
-  useEffect(() => {
-    const fetchTotalEarnings = async () => {
-      try {
-
-        const userEmail = localStorage.getItem('userEmail')
-        if (userEmail) {
-          const user = await getUserByEmail(userEmail)
-          if (user) {
-            const availableRewards = await getAvailableRewards(user.id) as any
-            console.log('availableRewards from layout', availableRewards);
-            setTotalEarnings(availableRewards)
-          }
-        }
-
-      } catch (error) {
-        console.error('Error fetching total earnings:', error)
-      }
-    }
-
-    fetchTotalEarnings()
-
-
-  }, [])
 
   return (
     <html lang="en">
       <body className={inter.className}>
 
         <div className="min-h-screen bg-gray-50 flex flex-col">
-          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} totalEarings={totalEarnings} />
+          <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)}  />
           <div className="flex flex-1">
 
             <SideBarDashboard></SideBarDashboard>

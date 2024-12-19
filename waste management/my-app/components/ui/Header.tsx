@@ -1,88 +1,69 @@
 'use client'
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button"
-import { Menu, Coins, Leaf, Search, Bell, User, ChevronDown, LogIn } from "lucide-react";
+import { Menu, Coins, Leaf, Bell, User, ChevronDown, LogIn, UserPlus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Badge } from "@/components/ui/badge"
-import { Web3Auth } from "@web3auth/modal";
-import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from "@web3auth/base";
-import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
-import { checkUser, createUser, getUnreadNotifications, getUserBalance, getUserByEmail, markNotificationAsRead } from "@/utils/db/actions";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
-
-const clientId = process.env.W3_AUTH_CLIENT_ID
-
-const chainConfig = {
-    chainNamespace: CHAIN_NAMESPACES.EIP155,
-    chainId: '0xaa36a7',
-    rpcTarget: 'https://rpc.ankr.com/eth_sepolia',
-    displayName: 'Sepolia Testnet',
-    blockExlorerUrl: 'https://sepolia.etherscan.io',
-    ticker: 'ETH',
-    ticketName: 'Ethereum',
-    logo: 'https://assets.web3auth.io/evm-chains/sepolia.png'
-}
-const privateKeyProvider = new EthereumPrivateKeyProvider({
-    config: { chainConfig },
-})
-const web3auth = new Web3Auth({
-    clientId,
-    web3AuthNetwork: WEB3AUTH_NETWORK.TESTNET,
-    privateKeyProvider
-})
+import { getUnreadNotifications, getUserBalance, getUserByEmail, markNotificationAsRead } from "@/utils/db/actions";
+import Login from "./user/Login";
+import SignUp from "./user/SignUp";
 
 interface HeaderProps {
     onMenuClick: () => void;
-    totalEarings: number;
+
 }
 
-export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
-    const [provider, setProvider] = useState<IProvider | null>(null)
+export default function Header({ onMenuClick }: HeaderProps) {
     const [loggedIn, setLoggedIn] = useState(false)
-    const [loading, setLoading] = useState(true)
+    const [openLogin, setOpenLogin] = useState(false)
+    const [openSignUp, setOpenSignUp] = useState(false)
     const [userInfo, setUserInfo] = useState<any>(null)
-    const pathname = usePathname()
     const [notification, setNotification] = useState<Notification[]>([])
     const [balence, setBalence] = useState(0)
     const router = useRouter()
-    useEffect(() => {
-        const init = async () => {
-            try {
-                await web3auth.initModal();
-                setProvider(web3auth.provider)
-                if (web3auth.connected) {
-                    setLoggedIn(true)
-                    const user = await web3auth.getUserInfo()
-                    if (user.email) {
-                        localStorage.setItem('userEmail', user.email)
-                        try {
-                            const userS = await getUserByEmail(user.email)
-                            setUserInfo(userS)
-                        } catch (error) {
-                            console.error('Không thể tạo được user', error);
-                        }
-                    }
+
+
+
+    const init = async () => {
+        
+        try {
+            const userEmail = localStorage.getItem('userEmail')
+            if (userEmail) {
+                setLoggedIn(true)
+
+                try {
+                    const userS = await getUserByEmail(userEmail)
+                    setUserInfo(userS)
+                } catch (error) {
+                    console.error('Không thể tạo được user', error);
                 }
-            } catch (error) {
-                console.error('Lỗi đăng nhập web3auth', error);
             }
-            finally {
-                setLoading(false)
-            }
+
+
+        } catch (error) {
+            console.error('Lỗi đăng nhập', error);
         }
+      
+
+    }
+    useEffect(() => {
+
         init()
     }, [])
-
+    // thong bao
     useEffect(() => {
         const fetchNotifications = async () => {
             if (userInfo && userInfo.email) {
                 const user = await getUserByEmail(userInfo.email)
                 if (user) {
                     const unreadNotifications = await getUnreadNotifications(user.id)
-                    setNotification(unreadNotifications)
+                    setNotification(unreadNotifications as [])
                 }
+            }
+            else {
+                setNotification([])
             }
         }
         fetchNotifications()
@@ -92,7 +73,7 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
         }, 30000);
         return () => clearInterval(notificationInterval)
     }, [userInfo])
-
+    // tong diem
     useEffect(() => {
         const fetchUserBalance = async () => {
             if (userInfo && userInfo.email) {
@@ -101,6 +82,9 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                     const userBalence = await getUserBalance(user.id)
                     setBalence(userBalence)
                 }
+            }
+            else {
+                setBalence(0)
             }
         }
         fetchUserBalance()
@@ -115,46 +99,16 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
         }
 
     }, [userInfo])
+    // dang nhap
 
-    const login = async () => {
-        if (!web3auth) {
-            console.error('Bạn chưa có web3auth');
-            return
-        }
-        try {
-            const web3authProvider = await web3auth.connect()
-            setProvider(web3authProvider)
-            setLoggedIn(true)
-            const user = await web3auth.getUserInfo()
-            setUserInfo(user)
-            if (user.email) {
-                localStorage.setItem('userEmail', user.email)
-                try {
-                    const checkUSer = await checkUser(user.email)
-                    if (checkUSer) {
-                       const userLogin = await getUserByEmail(user.email)
-                       setRole(userLogin?.role as any)
-                    } else {
-                        await createUser(user.email, user.name || 'người dùng ẩn danh')
-                    }
-                } catch (error) {
-                    console.error("Lỗi Tạo Người Dùng", error)
-                }
-            }
-        } catch (error) {
-            console.error('Lỗi Đăng Ký', error);
-        }
-    }
 
+    // dang xuat
     const logout = async () => {
-        if (!web3auth) {
-            console.log("web3auth Không Khả Dụng ");
-            return
-        }
+
         try {
-            await web3auth.logout()
+
             router.push('/')
-            setProvider(null)
+
             setLoggedIn(false)
             setUserInfo(null)
             localStorage.removeItem('userEmail')
@@ -163,27 +117,9 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
         }
     }
 
-    const getUserInfo = async () => {
-        if (web3auth) {
-            const user = await web3auth.getUserInfo()
-            setUserInfo(user)
-            if (user.email) {
-                localStorage.setItem('userEmail', user.email)
-                try {
-                    await getUserByEmail(user.email)
-                } catch (error) {
-                    console.error("Lỗi Đang Tạo User", error)
-                }
-            }
-        }
-    }
-
+    // xem thong bao
     const handleNotificationClick = async (notificationId: number) => {
         await markNotificationAsRead(notificationId)
-    }
-
-    if (loading) {
-        return <div>loading.....</div>
     }
 
     return (
@@ -206,14 +142,14 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                 <div className="flex items-center space-x-4">
                     <DropdownMenu>
                         <DropdownMenuTrigger>
-                            <Button variant="ghost" size="icon" className="relative p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 ease-in-out">
+                            <div  className="relative p-2 hover:bg-gray-200 rounded-full transition-colors duration-200 ease-in-out">
                                 <Bell className="h-10 w-12 md:h-12 md:w-[20px] text-gray-800" />
                                 {notification.length > 0 && (
                                     <Badge className="absolute -top-1 -right-1 px-1 min-w-[1.2rem] h-5 bg-red-500 text-white text-xs rounded-full flex justify-center items-center">
                                         {notification.length}
                                     </Badge>
                                 )}
-                            </Button>
+                            </div>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-64 bg-white shadow-lg rounded-lg border border-gray-200">
                             {notification.length > 0 ? (
@@ -238,10 +174,18 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                     </div>
 
                     {!loggedIn ? (
-                        <Button onClick={login} className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base  px-4 py-2 transition-all duration-200 ease-in-out">
-                            Đăng Ký
-                            <LogIn className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5" />
-                        </Button>
+                        <div className=" flex">
+
+                            <Button onClick={() => setOpenSignUp(true)} className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base  px-4 py-2 transition-all duration-200 ease-in-out">
+                                Đăng kí
+                                <UserPlus className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5" />
+                            </Button>
+                            <Button onClick={() => setOpenLogin(true)} className="bg-green-600 hover:bg-green-700 text-white text-sm md:text-base  px-4 py-2 transition-all duration-200 ease-in-out ml-2">
+                                Đăng nhập
+                                <LogIn className="ml-1 md:ml-2 h-4 w-4 md:h-5 md:w-5" />
+                            </Button>
+                        </div>
+
                     ) : (
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
@@ -251,27 +195,25 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-white shadow-lg rounded-lg border border-gray-200">
-                                <DropdownMenuItem onClick={getUserInfo} className="p-2 hover:bg-gray-100 rounded-md">
+                                <DropdownMenuItem onClick={() => { router.push('/user/settings') }} className="p-2 hover:bg-gray-100 rounded-md">
                                     {userInfo ? userInfo.name : 'Thông tin'}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={getUserInfo} className="p-2 hover:bg-gray-100 rounded-md">
-                                    <Link href="/user/settings">Thay đổi thông tin</Link>
-                                </DropdownMenuItem>
+                              
                                 <DropdownMenuItem onClick={() => router.push('/user/voucher-wallet')} className="p-2 hover:bg-gray-100 rounded-md">
                                     Kho voucher
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={logout} className="p-2 hover:bg-gray-100 rounded-md">
                                     Đăng Xuất
                                 </DropdownMenuItem>
-                            {
-                                userInfo?.role === 'ADMIN' ?(
-                                    <DropdownMenuItem onClick={() => router.push('/dashboard')} className="p-2 hover:bg-gray-100 rounded-md">
-                                    Admin
-                                </DropdownMenuItem>
-                                ):(
-                                    <div></div>
-                                )
-                            }
+                                {
+                                    userInfo?.role === 'ADMIN' ? (
+                                        <DropdownMenuItem onClick={() => router.push('/dashboard')} className="p-2 hover:bg-gray-100 rounded-md">
+                                            Admin
+                                        </DropdownMenuItem>
+                                    ) : (
+                                        <div></div>
+                                    )
+                                }
 
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -279,6 +221,19 @@ export default function Header({ onMenuClick, totalEarings }: HeaderProps) {
                 </div>
 
             </div>
+            {
+                openLogin && (
+                    <Login onclose={() => setOpenLogin(false)} init={init}></Login>
+
+                )
+            }
+            {
+                openSignUp && (
+                    <SignUp onclose={() => setOpenSignUp(false)}></SignUp>
+
+                )
+            }
         </header>
+
     );
 }

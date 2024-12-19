@@ -4,7 +4,6 @@ import { Bar, BarChart, CartesianGrid, Legend, Line, XAxis, YAxis, Tooltip } fro
 import {
     ChartConfig,
     ChartContainer,
-    ChartTooltip,
     ChartTooltipContent,
 } from "@/components/ui/chart";
 import { useEffect, useState } from "react";
@@ -103,7 +102,7 @@ export default function WasteChart() {
             </h1>
 
             {/* Đặt khoảng cách giữa biểu đồ và các nút */}
-            <div className="mb-8"> 
+            <div className="mb-8">
                 <div className="flex flex-wrap justify-center items-start gap-20">
                     {/* Biểu đồ cột */}
                     <ChartContainer
@@ -117,8 +116,10 @@ export default function WasteChart() {
                                 tickLine={false}
                                 tickMargin={12}
                                 axisLine={false}
-                                angle={0}
-                                textAnchor="end"
+
+                                textAnchor="end" // Đặt vị trí cuối nhãn
+                                interval={0} // Hiển thị tất cả nhãn mà không bỏ qua tháng nào
+                                tick={{ fontSize: 12, fill: '#333', fontWeight: 'bold' }} // Tùy chỉnh kiểu chữ
                             />
                             <YAxis />
                             <Legend

@@ -101,7 +101,6 @@ export default function ReportPage() {
             reader.readAsDataURL(selectedFile)
         }
     }
-    console.log('preview', preview);
 
     const readFileAsBase = (file: File): Promise<String> => {
         return new Promise((resolve, reject) => {
@@ -179,7 +178,7 @@ export default function ReportPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (verificationStatus !== "sucess" || !user) {
-            toast.error("lam oi dang nhap")
+            toast.error("Đăng nhập để thực hiện chức năng này")
             return
         }
         setIsSubmitting(true)
@@ -230,8 +229,8 @@ export default function ReportPage() {
                     createdAt: report.createdAt.toISOString().split("T")[0]
                 }))
                 setReports(formattedReports)
-            } else {
-                router.push("/")
+            } else {    
+                toast.error('Vui lòng đăng nhập để thực hiện chức năng này')
             }
 
 

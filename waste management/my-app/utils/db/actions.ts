@@ -3,9 +3,10 @@ import { db } from "./dbConfig";
 import { Notifications, Transaction, Users, Reports, Rewards,collectedWaste, News, Voucher } from "./schema";
 import { eq, sql, and, desc, asc,  } from "drizzle-orm";
 
-export async function createUser(email: string, name: string) {
+
+export async function createUser(email: string, name: string,password:string) {
     try {
-        const [user] = await db.insert(Users).values({ email, name }).returning().execute()
+        const [user] = await db.insert(Users).values({ email, name,password}).returning().execute()
         return user
     } catch (error) {
         console.error('error')
@@ -13,7 +14,6 @@ export async function createUser(email: string, name: string) {
 
     }
 }
-
 export async function getUserByEmail(email: string) {
     try {
         const [user] = await db.select().from(Users).where(eq(Users.email, email)).execute()
@@ -142,9 +142,12 @@ export async function getAvailableRewards(userId: number) {
 
         // Get user's total points
         const userTransactions = await getRewardTransactions(userId) as any;
+        console.log('userTransactions',userTransactions);
+        
         const userPoints = userTransactions.reduce((total: any, transaction: any) => {
             return transaction.type.startsWith('earned') ? total + transaction.amount : total - transaction.amount;
         }, 0);
+console.log('userPoints',userPoints);
 
 
 
@@ -176,13 +179,15 @@ export async function getAvailableRewards(userId: number) {
             ...dbRewards
         ];
 
+        return allRewards
 
-        return allRewards;
+      
     } catch (error) {
         console.error("Error fetching available rewards:", error);
         return [];
     }
 }
+
 export async function getWasteCollectionTalk(limit: number = 50) {
     try {
         const tasks = await db
@@ -319,21 +324,21 @@ export async function updateTaskStatus(reportId: number, newStatus: string, coll
 
     }
 }
-export async function checkUser (email:string){
-    try {
-        const [user] = await db.select().from(Users).where(eq(Users.email, email)).execute()
-        if(user){
-            return true
-        }else{
-            return false
-        }
+// export async function checkUser (email:string){
+//     try {
+//         const [user] = await db.select().from(Users).where(eq(Users.email, email)).execute()
+//         if(user){
+//             return true
+//         }else{
+//             return false
+//         }
 
-    } catch (error) {
-        console.error("loi check user", error);
-        return false
+//     } catch (error) {
+//         console.error("loi check user", error);
+//         return false
 
-    }
-}
+//     }
+// }
 export async function getAmountWaste (limit: number = 20){
     try {
         const amountWaste = await db.select({
@@ -401,6 +406,15 @@ export async function updateUserByEmail (email:string,name:string,phone:string,a
     try {
         const updateUser = await db.update(Users).set({name,phone,address}).where(eq(Users.email,email))
         return updateUser
+    } catch (error) {
+        console.error("loi update user", error);
+        return null
+    }
+}
+export async function updatePasswordByEmail (email:string,password:string){
+    try {
+        const updatePassword = await db.update(Users).set({password}).where(eq(Users.email,email))
+        return updatePassword
     } catch (error) {
         console.error("loi update user", error);
         return null
@@ -650,26 +664,25 @@ export async function getHistoryRewards(id:number){
 export async function getVoucherUser(id:number){
     try {
         
-        const voucher = await db.select({
-            id:Voucher.id,
-            name:Voucher.name,
-            description: Voucher.description,
-            content: Voucher.content,
-            type:Voucher.status,
-            point:Voucher.point,
-        }).from(Voucher).where(eq(Voucher.userId,id))
-       
+        const voucher = await db.select().from(Voucher).where(eq(Voucher.userId,id))
        return voucher
-        
-        
-        
-       
-        
+   
     } catch (error) {1
         console.error('loi getvoucher', error);
         return null
     }
 }
+export async function updateVoucherUsed(id:number){
+    try {
+        const voucher = await db.update(Voucher).set({status:'used'}).where(eq(Voucher.id,id))
+        return voucher
+   
+    } catch (error) {1
+        console.error('loi getvoucher', error);
+        return null
+    }
+}
+
 export async function getCollect(){
     try {
         
@@ -682,11 +695,6 @@ export async function getCollect(){
         }).from(collectedWaste).leftJoin(Users,eq(collectedWaste.collectorId,Users.id)).leftJoin(Reports,eq(collectedWaste.reportId,Reports.id))
        
         return collect
-        
-        
-        
-        
-       
         
     } catch (error) {1
         console.error('loi getvoucher', error);

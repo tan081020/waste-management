@@ -9,9 +9,10 @@ export const Users = pgTable('users', {
     id: serial('id').primaryKey(),
     email: varchar('email', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
-    phone: varchar('phone',{length:10}),
-    address: varchar('address',{length:200}),
-    role: varchar('role',{length:200}).default('USER').notNull(),
+    phone: varchar('phone', { length: 10 }),
+    address: varchar('address', { length: 200 }),
+    password: varchar('password',{length:255}).notNull(),
+    role: varchar('role', { length: 200 }).default('USER').notNull(),
     createAt: timestamp('created_at').defaultNow().notNull()
 
 })
@@ -69,7 +70,7 @@ export const Transaction = pgTable('transaction', {
 
 
 })
-export const News = pgTable('news',{
+export const News = pgTable('news', {
     id: serial('id').primaryKey(),
     userId: integer('user_id').references(() => Users.id).notNull(),
     imageUrl: text('image_url'),
@@ -80,15 +81,17 @@ export const News = pgTable('news',{
 
 
 })
-export const Voucher = pgTable('voucher',{
+export const Voucher = pgTable('voucher', {
     id: serial('id').primaryKey(),
     userId: integer('user_id').references(() => Users.id),
     name: varchar('name', { length: 255 }).notNull(),
     description: varchar('description', { length: 255 }).notNull(),
     content: text('content').notNull(),
     point: integer('point').notNull(),
+    cardCode: varchar('card_code', { length: 20 }),
+    type: varchar('type', { length: 255 }).notNull(),
     createAt: timestamp('created_at').defaultNow().notNull(),
     status: varchar('status', { length: 255 }).notNull().default('not_used'),
 
- 
+
 })

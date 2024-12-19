@@ -54,23 +54,36 @@ export default function RewardsPage() {
           const fetchedUser = await getUserByEmail(userEmail)
           if (fetchedUser) {
             setUser(fetchedUser)
-            const fetchedTransactions = await getRewardTransactions(fetchedUser.id)
-            setTransactions(fetchedTransactions as Transaction[])
-            const fetchedRewards = await getAvailableRewards(fetchedUser.id)
-            setRewards(fetchedRewards.filter(r => r.cost > 0)) // Filter out rewards with 0 points
+            const fetchedTransactions = await getRewardTransactions(fetchedUser.id);
+            if (!Array.isArray(fetchedTransactions)) throw new Error("Invalid transactions data");
+        
+            setTransactions(fetchedTransactions as Transaction[]);
+        
+            const fetchedRewards = await getAvailableRewards(fetchedUser.id);
+            if (!Array.isArray(fetchedRewards)) throw new Error("Invalid rewards data");
+        
+            // Filter out rewards with 0 points
+            setRewards(fetchedRewards.filter(r => r.cost > 0));
+        
+            // Calculate balance
             const calculatedBalance = fetchedTransactions.reduce((acc, transaction) => {
-              return transaction.type.startsWith('earned') ? acc + transaction.amount : acc - transaction.amount
-            }, 0)
+              const amount = transaction.amount ?? 0; // Ensuring `amount` is a number
+              if (transaction.type.startsWith('earned')) {
+                return acc + amount;
+              } else {
+                return acc - amount;
+              }
+            }, 0);
             setBalance(Math.max(calculatedBalance, 0)) // Ensure balance is never negative
           } else {
-            toast.error('User not found. Please log in again.')
+            toast.error('Vui lòng đăng nhập để thực hiện chức năng này')
           }
         } else {
-          toast.error('User not logged in. Please log in.')
+          toast.error('Vui lòng đăng nhập để thực hiện chức năng này')
         }
       } catch (error) {
         console.error('Error fetching user data and rewards:', error)
-        toast.error('Failed to load rewards data. Please try again.')
+        toast.error('thử lại sau ')
       } finally {
         setLoading(false)
       }
@@ -86,12 +99,12 @@ export default function RewardsPage() {
       return
     }
     if (balance < point) {
-      toast.error('lo đi dọn rác đổi cái địt mẹ mày')
+      toast.error(' Bạn ko đủ điểm để đổi vật phẩm này')
       return
     } else {
       const updateVoucher = await updateVoucherUserId(voucherId, user.id)
       await createTransaction(user.id, 'redeemed', point, `Đổi ${name}`);
-      toast.success('hihi chúc mừng chúa công đã đổi đc nhe')
+      toast.success('chúc mừng bạn đã đổi thành ccông')
 
     }
 
@@ -99,23 +112,7 @@ export default function RewardsPage() {
 
 
 
-  const refreshUserData = async () => {
-    if (user) {
-      const fetchedUser = await getUserByEmail(user.email);
-      if (fetchedUser) {
-        const fetchedTransactions = await getRewardTransactions(fetchedUser.id);
-        setTransactions(fetchedTransactions as Transaction[]);
-        const fetchedRewards = await getAvailableRewards(fetchedUser.id);
-        setRewards(fetchedRewards.filter(r => r.cost > 0)); // Filter out rewards with 0 points
-
-        // Recalculate balance
-        const calculatedBalance = fetchedTransactions.reduce((acc, transaction) => {
-          return transaction.type.startsWith('earned') ? acc + transaction.amount : acc - transaction.amount
-        }, 0)
-        setBalance(Math.max(calculatedBalance, 0)) // Ensure balance is never negative
-      }
-    }
-  }
+  
 
   if (loading) {
     return (
